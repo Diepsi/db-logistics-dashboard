@@ -15,13 +15,21 @@ use Illuminate\View\View;
  */
 class WebsiteAuthController extends Controller
 {
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
+        if (Auth::check()) {
+            return $this->authenticatedLanding(Auth::user());
+        }
+
         return view('website.auth.login');
     }
 
     public function store(LoginRequest $request): RedirectResponse
     {
+        if (Auth::check()) {
+            return $this->authenticatedLanding($request->user());
+        }
+
         $request->authenticate();
 
         if (! $request->user()->isAdmin()) {
@@ -35,5 +43,15 @@ class WebsiteAuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended(route('website.posts.index', absolute: false));
+    }
+
+    /**
+     * Tujuan untuk user yang sudah login saat membuka halaman login website.
+     */
+    private function authenticatedLanding($user): RedirectResponse
+    {
+        return $user->isAdmin()
+            ? redirect(route('website.posts.index', absolute: false))
+            : redirect(route('dashboard', absolute: false));
     }
 }

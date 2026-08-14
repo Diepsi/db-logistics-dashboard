@@ -26,10 +26,8 @@ Route::get('/berita/{slug}', [SiteController::class, 'beritaShow'])->name('berit
 // LOGIN ADMIN WEBSITE (jalur terpisah dari login dashboard).
 // Akun yang sama dengan dashboard, hanya role admin yang dibolehkan.
 // ------------------------------------------------------------
-Route::middleware('guest')->group(function () {
-    Route::get('/website/login', [WebsiteAuthController::class, 'create'])->name('website.login');
-    Route::post('/website/login', [WebsiteAuthController::class, 'store']);
-});
+Route::get('/website/login', [WebsiteAuthController::class, 'create'])->name('website.login');
+Route::post('/website/login', [WebsiteAuthController::class, 'store']);
 
 // ------------------------------------------------------------
 // CMS WEBSITE (Berita/Artikel) — khusus admin, lewat jalur login website

@@ -78,6 +78,24 @@ class WebsiteAdminTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
+    public function test_authenticated_admin_visiting_website_login_goes_to_posts(): void
+    {
+        $user = $this->createUser('admin');
+
+        $this->actingAs($user)
+            ->get(route('website.login'))
+            ->assertRedirect(route('website.posts.index'));
+    }
+
+    public function test_authenticated_non_admin_visiting_website_login_goes_to_dashboard(): void
+    {
+        $user = $this->createUser('staff');
+
+        $this->actingAs($user)
+            ->get(route('website.login'))
+            ->assertRedirect(route('dashboard'));
+    }
+
     public function test_non_admin_cannot_access_post_routes(): void
     {
         $user = $this->createUser('staff');
