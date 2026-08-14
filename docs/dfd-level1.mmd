@@ -1,0 +1,121 @@
+%% =====================================================================
+%% DFD Level 1 — Sistem Informasi Logistik ANL
+%%
+%% Cara render:
+%%   1. Salin seluruh isi file ini ke https://mermaid.live lalu export PNG/SVG,
+%%      atau
+%%   2. Buka di VS Code dengan ekstensi "Mermaid Preview / Markdown Preview Mermaid".
+%%
+%% Simbol: [ ] = entitas eksternal | ( ) = proses | [( )] = data store
+%% =====================================================================
+
+flowchart TD
+    %% ===== Entitas Eksternal =====
+    Admin(["Admin"])
+    PM(["Project Manager"])
+    Staff(["Staff"])
+    Visitor(["Pengunjung Website"])
+    Excel(["File Data Excel"])
+
+    %% ===== Data Store =====
+    DS_Roles[("roles")]
+    DS_Users[("users")]
+    DS_Batches[("import_batches")]
+    DS_Shipments[("shipments")]
+    DS_Vendors[("vendors")]
+    DS_Locations[("locations")]
+    DS_Issues[("shipment_issues")]
+    DS_Posts[("posts")]
+
+    %% ===== Proses =====
+    P1("1.0 Autentikasi")
+    P2("2.0 Kelola Profil")
+    P3("3.0 Import Data Excel")
+    P4("4.0 Kelola Data Pengiriman")
+    P5("5.0 Laporan & Ekspor")
+    P6("6.0 Dashboard KPI")
+    P7("7.0 Kelola Berita (CMS)")
+    P8("8.0 Halaman Publik")
+    P9("9.0 Form Kontak")
+
+    subgraph ModulDashboard["Modul Dashboard Operasional"]
+        direction TB
+        P1 --> P2
+        P3 --> P4
+        P4 --> P6
+        P4 --> P5
+    end
+
+    subgraph ModulWebsite["Modul Website Publik & CMS"]
+        direction TB
+        P7 --> P8
+    end
+
+    %% ---- 1.0 Autentikasi ----
+    Admin -->|"data login"| P1
+    PM -->|"data login"| P1
+    Staff -->|"data login"| P1
+    P1 -->|"validasi kredensial & hak akses"| DS_Users
+    P1 -->|"cek peran (admin / project-manager / staff)"| DS_Roles
+    P1 -->|"sesi & token autentikasi"| Admin
+    P1 -->|"sesi & token autentikasi"| PM
+    P1 -->|"sesi & token autentikasi"| Staff
+
+    %% ---- 2.0 Kelola Profil ----
+    Admin -->|"perubahan profil"| P2
+    PM -->|"perubahan profil"| P2
+    Staff -->|"perubahan profil"| P2
+    P2 -->|"simpan / hapus data profil"| DS_Users
+    P2 -->|"konfirmasi"| Admin
+    P2 -->|"konfirmasi"| PM
+    P2 -->|"konfirmasi"| Staff
+
+    %% ---- 3.0 Import Data Excel ----
+    Admin -->|"upload file Excel"| P3
+    P3 -->|"baca & validasi baris"| Excel
+    P3 -->|"catat batch import + statistik validasi"| DS_Batches
+    P3 -->|"upsert data pengiriman (anti duplikat waybill_no)"| DS_Shipments
+    P3 -->|"referensi vendor"| DS_Vendors
+    P3 -->|"referensi lokasi"| DS_Locations
+    P3 -->|"laporan hasil import (valid / invalid / duplikat)"| Admin
+
+    %% ---- 4.0 Kelola Data Pengiriman ----
+    Admin -->|"lihat / cari data pengiriman"| P4
+    Staff -->|"lihat / cari resi pengiriman"| P4
+    P4 -->|"baca data pengiriman & status SLA"| DS_Shipments
+    P4 -->|"baca / tulis isu pengiriman"| DS_Issues
+    P4 -->|"rincian pengiriman & status"| Admin
+    P4 -->|"rincian pengiriman & status"| Staff
+
+    %% ---- 5.0 Laporan & Ekspor ----
+    Admin -->|"permintaan laporan"| P5
+    PM -->|"permintaan laporan"| P5
+    P5 -->|"agregasi data pengiriman"| DS_Shipments
+    P5 -->|"agregasi isu pengiriman"| DS_Issues
+    P5 -->|"file laporan Excel / PDF"| Admin
+    P5 -->|"file laporan Excel / PDF"| PM
+
+    %% ---- 6.0 Dashboard KPI ----
+    Admin -->|"melihat ringkasan KPI"| P6
+    PM -->|"melihat ringkasan KPI"| P6
+    Staff -->|"melihat ringkasan KPI"| P6
+    P6 -->|"agregasi KPI & statistik"| DS_Shipments
+    P6 -->|"agregasi isu"| DS_Issues
+    P6 -->|"data KPI dashboard"| Admin
+    P6 -->|"data KPI dashboard"| PM
+    P6 -->|"data KPI dashboard"| Staff
+
+    %% ---- 7.0 Kelola Berita (CMS) ----
+    Admin -->|"login website / CMS"| P7
+    P7 -->|"baca / tulis / hapus artikel"| DS_Posts
+    P7 -->|"konfirmasi simpan / publikasi"| Admin
+
+    %% ---- 8.0 Halaman Publik ----
+    Visitor -->|"buka halaman (beranda, tentang, layanan, berita)"| P8
+    P8 -->|"baca artikel yang dipublikasikan"| DS_Posts
+    P8 -->|"konten halaman website"| Visitor
+
+    %% ---- 9.0 Form Kontak ----
+    Visitor -->|"isi form kontak"| P9
+    P9 -->|"catat pesan ke log aplikasi (logger)"| Visitor
+    P9 -->|"konfirmasi pesan terkirim"| Visitor

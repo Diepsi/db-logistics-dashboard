@@ -1,0 +1,134 @@
+%% =====================================================================
+%% ERD — Sistem Informasi Logistik Amanah Nusantara Logistik (ANL)
+%%
+%% Cara render:
+%%   1. Salin seluruh isi file ini ke https://mermaid.live lalu export PNG/SVG,
+%%      atau
+%%   2. Buka di VS Code dengan ekstensi "Mermaid Preview / Markdown Preview Mermaid".
+%%
+%% Catatan:
+%%   - Tabel infrastruktur Laravel (sessions, cache, jobs, password_reset_tokens)
+%%     tidak disertakan karena di luar lingkup bisnis.
+%%   - Simbol relasi: ||--o{ = "satu ke banyak" (one-to-many).
+%% =====================================================================
+
+erDiagram
+    ROLES {
+        bigint id PK
+        string name
+        string slug UK
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        timestamp email_verified_at
+        string password
+        string remember_token
+        bigint role_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    IMPORT_BATCHES {
+        bigint id PK
+        string file_name
+        string original_path
+        bigint uploaded_by FK
+        integer total_rows
+        integer valid_rows
+        integer invalid_rows
+        integer duplicate_rows
+        integer new_rows
+        integer updated_rows
+        string status
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    VENDORS {
+        bigint id PK
+        string name UK
+        string code
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    LOCATIONS {
+        bigint id PK
+        string province
+        string city_regency
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SHIPMENTS {
+        bigint id PK
+        bigint import_batch_id FK
+        bigint vendor_id FK
+        string waybill_no UK
+        string manifest_no
+        string npsn
+        string school_name
+        string province
+        string city_regency
+        bigint location_id FK
+        datetime ho_date
+        datetime pickup_eta
+        string pickup_sla_status
+        string pickup_result
+        datetime delivery_eta
+        string delivery_sla_status
+        string delivery_result
+        string vendor_lm
+        string lm_sla_status
+        string lm_result
+        string vendor_sla_status
+        string vendor_result
+        string status_update
+        string final_status
+        boolean is_within_sla
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SHIPMENT_ISSUES {
+        bigint id PK
+        bigint shipment_id FK
+        string issue_type
+        text description
+        datetime reported_at
+        datetime resolved_at
+        bigint resolved_by FK
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    POSTS {
+        bigint id PK
+        string title
+        string slug UK
+        string excerpt
+        longtext body
+        string cover_image
+        bigint author_id FK
+        string status
+        timestamp published_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ROLES ||--o{ USERS : "memiliki"
+    USERS ||--o{ IMPORT_BATCHES : "mengupload"
+    USERS ||--o{ SHIPMENT_ISSUES : "menyelesaikan"
+    USERS ||--o{ POSTS : "menulis"
+    IMPORT_BATCHES ||--o{ SHIPMENTS : "berisi"
+    VENDORS ||--o{ SHIPMENTS : "ditetapkan"
+    LOCATIONS ||--o{ SHIPMENTS : "dituju"
+    SHIPMENTS ||--o{ SHIPMENT_ISSUES : "memiliki"

@@ -1,0 +1,34 @@
+%% =====================================================================
+%% DFD Diagram Konteks (Level 0) — Sistem Informasi Logistik ANL
+%%
+%% Cara render:
+%%   1. Salin seluruh isi file ini ke https://mermaid.live lalu export PNG/SVG,
+%%      atau
+%%   2. Buka di VS Code dengan ekstensi "Mermaid Preview / Markdown Preview Mermaid".
+%% =====================================================================
+
+flowchart TB
+    P0(["0. Sistem Informasi<br/>Logistik ANL"])
+
+    Admin(["Admin"])
+    PM(["Project Manager"])
+    Staff(["Staff"])
+    Visitor(["Pengunjung<br/>Website"])
+    Excel(["File Data<br/>Excel"])
+
+    %% Modul Dashboard
+    Admin <-->|"data login, profil, import, pengiriman, laporan"| P0
+    P0 -->|"beranda KPI, rekap pengiriman, hasil validasi import"| Admin
+
+    PM <-->|"data login, profil, permintaan laporan"| P0
+    P0 -->|"beranda KPI, laporan Excel / PDF"| PM
+
+    Staff <-->|"data login, profil, pencarian resi"| P0
+    P0 -->|"beranda KPI, data pengiriman & status SLA"| Staff
+
+    Excel -->|"data pengiriman mentah (Excel)"| P0
+    P0 -->|"laporan validasi import (valid / invalid / duplikat)"| Excel
+
+    %% Modul Website Publik
+    Visitor -->|"lihat halaman, cari berita, isi form kontak"| P0
+    P0 -->|"konten website & konfirmasi pesan"| Visitor
