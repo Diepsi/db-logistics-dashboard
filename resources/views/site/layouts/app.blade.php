@@ -48,16 +48,6 @@
                             {{ $label }}
                         </a>
                     @endforeach
-
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="ml-3 px-5 py-2 rounded-lg bg-anl-gold text-anl-navy font-semibold text-sm hover:bg-anl-gold-dark transition-colors">
-                            Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="ml-3 px-5 py-2 rounded-lg bg-anl-gold text-anl-navy font-semibold text-sm hover:bg-anl-gold-dark transition-colors">
-                            Masuk Dashboard
-                        </a>
-                    @endauth
                 </div>
 
                 <!-- Menu Mobile -->
@@ -76,11 +66,6 @@
                         @foreach ($menuItems as $key => [$label, $url])
                             <a href="{{ $url }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ $label }}</a>
                         @endforeach
-                        @auth
-                            <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm font-semibold text-anl-navy hover:bg-gray-50 border-t border-gray-100">Dashboard</a>
-                        @else
-                            <a href="{{ route('login') }}" class="block px-4 py-2 text-sm font-semibold text-anl-navy hover:bg-gray-50 border-t border-gray-100">Masuk Dashboard</a>
-                        @endauth
                     </div>
                 </div>
             </div>
@@ -113,9 +98,6 @@
                         <li><a href="{{ route('about') }}" class="hover:text-anl-gold transition-colors">Tentang Kami</a></li>
                         <li><a href="{{ route('services') }}" class="hover:text-anl-gold transition-colors">Layanan</a></li>
                         <li><a href="{{ route('contact') }}" class="hover:text-anl-gold transition-colors">Kontak</a></li>
-                        @guest
-                            <li><a href="{{ route('login') }}" class="hover:text-anl-gold transition-colors">Masuk Dashboard</a></li>
-                        @endguest
                     </ul>
                 </div>
 

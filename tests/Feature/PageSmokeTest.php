@@ -33,6 +33,14 @@ class PageSmokeTest extends TestCase
         $this->get('/kontak')->assertOk();
     }
 
+    public function test_public_website_does_not_expose_dashboard_access(): void
+    {
+        $this->get('/')->assertDontSee('Masuk Dashboard')->assertDontSee('Buka Dashboard');
+        $this->get('/tentang')->assertDontSee('Masuk Dashboard')->assertDontSee('Buka Dashboard');
+        $this->get('/layanan')->assertDontSee('Masuk Dashboard')->assertDontSee('Buka Dashboard');
+        $this->get('/kontak')->assertDontSee('Masuk Dashboard')->assertDontSee('Buka Dashboard');
+    }
+
     public function test_contact_form_can_be_submitted(): void
     {
         $this->post('/kontak', [

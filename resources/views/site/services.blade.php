@@ -51,11 +51,6 @@
                 <a href="{{ route('contact') }}" class="px-6 py-3 rounded-lg bg-anl-gold text-anl-navy font-semibold hover:bg-anl-gold-dark transition-colors">
                     Hubungi Kami
                 </a>
-                @guest
-                    <a href="{{ route('login') }}" class="px-6 py-3 rounded-lg border border-white/30 font-semibold hover:bg-white/10 transition-colors">
-                        Masuk Dashboard
-                    </a>
-                @endguest
             </div>
         </div>
     </section>

@@ -94,7 +94,7 @@
                     </p>
                     <ul class="mt-8 space-y-5">
                         @foreach ([
-                            ['Pelacakan Real-Time', 'Pantau status setiap pengiriman secara langsung melalui dashboard operasional.'],
+                            ['Pelacakan Real-Time', 'Pantau status setiap pengiriman Anda secara real-time, dari penjemputan hingga barang tiba di tujuan.'],
                             ['Jaminan SLA', 'Komitmen waktu pengiriman yang terukur dan dapat dipertanggungjawabkan.'],
                             ['Tim Profesional', 'Ditangani oleh tim logistik berpengalaman dengan standar operasional yang ketat.'],
                             ['Amanah', 'Setiap muatan dijaga dengan prosedur keamanan berlapis hingga sampai tujuan.'],
@@ -114,22 +114,16 @@
                     </ul>
                 </div>
 
-                <!-- Panel Akses Dashboard -->
+                <!-- Panel CTA Client -->
                 <div class="bg-anl-navy rounded-2xl text-white p-8 shadow-xl">
-                    <h3 class="text-2xl font-extrabold">Pantau Operasional Secara Langsung</h3>
+                    <h3 class="text-2xl font-extrabold">Butuh Solusi Logistik?</h3>
                     <p class="mt-4 text-gray-300 leading-relaxed">
-                        Akses dashboard operasional untuk melihat KPI pengiriman, kepatuhan SLA, dan performa vendor
-                        secara real-time — hanya untuk pengguna terdaftar.
+                        Hubungi tim kami untuk konsultasi kebutuhan distribusi perusahaan Anda.
+                        Kami siap membantu merancang solusi pengiriman yang aman, cepat, dan tepat waktu.
                     </p>
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="mt-6 inline-block px-6 py-3 rounded-lg bg-anl-gold text-anl-navy font-semibold hover:bg-anl-gold-dark transition-colors">
-                            Buka Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="mt-6 inline-block px-6 py-3 rounded-lg bg-anl-gold text-anl-navy font-semibold hover:bg-anl-gold-dark transition-colors">
-                            Masuk Dashboard
-                        </a>
-                    @endauth
+                    <a href="{{ route('contact') }}" class="mt-6 inline-block px-6 py-3 rounded-lg bg-anl-gold text-anl-navy font-semibold hover:bg-anl-gold-dark transition-colors">
+                        Hubungi Kami
+                    </a>
                 </div>
             </div>
         </div>
