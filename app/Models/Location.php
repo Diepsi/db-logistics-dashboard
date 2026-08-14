@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Vendor extends Model
+class Location extends Model
 {
     protected $guarded = ['id'];
 
-    public function shipments()
+    public function shipments(): HasMany
     {
         return $this->hasMany(Shipment::class);
     }

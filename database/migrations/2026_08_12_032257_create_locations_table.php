@@ -8,16 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('vendors', function (Blueprint $table) {
+        Schema::create('locations', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->string('code')->nullable();
+            $table->string('province')->index();
+            $table->string('city_regency')->index();
+            $table->unique(['province', 'city_regency']);
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('vendors');
+        Schema::dropIfExists('locations');
     }
 };

@@ -46,7 +46,7 @@
                             <h1 class="text-lg font-bold text-gray-800">
                                 {{ $header ?? 'Dashboard Monitoring' }}
                             </h1>
-                            <p class="text-xs text-gray-500">PT Daulay Humala Bersaudara - Operational Performance Layer</p>
+                            <p class="text-xs text-gray-500">Amanah Nusantara Logistik - Operational Performance Layer</p>
                         </div>
                     </div>
 
@@ -82,7 +82,7 @@
                                     <p class="text-xs text-gray-400">Signed in as</p>
                                     <p class="text-sm font-semibold text-gray-800 truncate">{{ Auth::user()->email ?? 'admin@dblogistics.com' }}</p>
                                 </div>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Profile Settings</a>
+                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Profile Settings</a>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50">

@@ -11,11 +11,15 @@ return new class extends Migration
         Schema::create('import_batches', function (Blueprint $table) {
             $table->id();
             $table->string('file_name');
+            $table->string('original_path')->nullable();
             $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
             $table->integer('total_rows')->default(0);
             $table->integer('valid_rows')->default(0);
             $table->integer('invalid_rows')->default(0);
-            $table->enum('status', ['pending', 'processing', 'completed', 'failed'])->default('pending');
+            $table->integer('duplicate_rows')->default(0);
+            $table->integer('new_rows')->default(0);
+            $table->integer('updated_rows')->default(0);
+            $table->enum('status', ['pending', 'processing', 'preview', 'completed', 'failed'])->default('pending');
             $table->text('notes')->nullable();
             $table->timestamps();
         });

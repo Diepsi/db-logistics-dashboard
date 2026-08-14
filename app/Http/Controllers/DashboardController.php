@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Shipment;
-use App\Models\Vendor;
+use App\Services\DashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -14,69 +13,59 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Query Dasar Shipment
-        $query = Shipment::query();
+        $service = app(DashboardService::class);
+
+        // Query dasar + filter global (FR-09)
+        $query = $service->shipmentQuery($request);
 
         // ----------------------------------------------------
-        // 1. FILTER MULTI-KRITERIA (FR-09)
+        // 1. KPI CARDS (7 KPI Utama — PRD Section 9.1)
         // ----------------------------------------------------
-        
-        // Filter Tanggal Handover (HO)
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('ho_date', [
-                $request->start_date . ' 00:00:00',
-                $request->end_date . ' 23:59:59'
-            ]);
-        }
+        $kpis = $service->kpis($query);
 
-        // Filter Provinsi
-        if ($request->filled('province')) {
-            $query->where('province', $request->province);
-        }
-
-        // Filter Vendor Last Mile
-        if ($request->filled('vendor_id')) {
-            $query->where('vendor_id', $request->vendor_id);
-        }
-
-        // Filter Status Akhir Pengiriman
-        if ($request->filled('status')) {
-            $query->where('final_status', $request->status);
-        }
+        // KPI periode sebelumnya + selisih % (untuk delta pada KPI card)
+        $prevKpis = $service->previousPeriodKpis($request);
+        $deltas = $prevKpis ? [
+            'total' => DashboardService::delta($kpis['totalShipments'], $prevKpis['total']),
+            'completed' => DashboardService::delta($kpis['completed'], $prevKpis['completed']),
+            'onDelivery' => DashboardService::delta($kpis['onDelivery'], $prevKpis['on_delivery']),
+            'undelivered' => DashboardService::delta($kpis['undelivered'], $prevKpis['undelivered']),
+            'withinSla' => DashboardService::delta($kpis['withinSla'], $prevKpis['within_sla']),
+            'overSla' => DashboardService::delta($kpis['overSla'], $prevKpis['total'] - $prevKpis['within_sla']),
+            'slaRate' => $kpis['slaAchievementRate'] > 0 && $prevKpis['total'] > 0
+                ? round($kpis['slaAchievementRate'] - (($prevKpis['within_sla'] / $prevKpis['total']) * 100), 1)
+                : null,
+        ] : [];
 
         // ----------------------------------------------------
-        // 2. PERHITUNGAN KPI CARDS (Section 9.1 PRD)
-        // ----------------------------------------------------
-        $totalShipments = (clone $query)->count();
-        $completed      = (clone $query)->where('final_status', 'Completed')->count();
-        $undelivered    = (clone $query)->where('final_status', 'Undelivered')->count();
-        $onDelivery     = (clone $query)->where('final_status', 'On Delivery')->count();
-        $withinSla      = (clone $query)->where('is_within_sla', true)->count();
-        $overSla        = (clone $query)->where('is_within_sla', false)->count();
-
-        // Persentase Kepatuhan SLA
-        $slaAchievementRate = $totalShipments > 0 
-            ? round(($withinSla / $totalShipments) * 100, 1) 
-            : 0;
-
-        // ----------------------------------------------------
-        // 3. AGREGASI DATA CHART.JS (Section 9.2 PRD)
+        // 2. DATA CHART.JS (PRD Section 9.2)
         // ----------------------------------------------------
 
-        // Chart 1: Donut Chart - Komposisi Status Pengiriman
-        $statusChartData = [
-            'Completed'   => $completed,
-            'On Delivery' => $onDelivery,
-            'Undelivered' => $undelivered,
+        // Chart 1: Donut — Komposisi Status Pengiriman
+        $statusChart = [
+            'Completed' => $kpis['completed'],
+            'On Delivery' => $kpis['onDelivery'],
+            'Undelivered' => $kpis['undelivered'],
         ];
 
-        // Chart 2: Doughnut Chart - Performa Kepatuhan SLA Overall
-        $slaChartData = [
-            'Within SLA' => $withinSla,
-            'Over SLA'   => $overSla,
+        // Chart 2: Donut — Performa Kepatuhan SLA
+        $slaChart = [
+            'Within SLA' => $kpis['withinSla'],
+            'Over SLA' => $kpis['overSla'],
         ];
 
-        // Chart 3: Bar Chart - Top 5 Volume Pengiriman per Provinsi
+        // Chart 3: Line — Tren Pengiriman per Hari (volume + SLA rate)
+        $trend = (clone $query)
+            ->selectRaw('DATE(ho_date) as date, COUNT(*) as total, SUM(CASE WHEN is_within_sla = 1 THEN 1 ELSE 0 END) as within_sla')
+            ->whereNotNull('ho_date')
+            ->groupByRaw('DATE(ho_date)')
+            ->orderBy('date')
+            ->get();
+
+        // Chart 3b: Bar — Tren Pengiriman per Bulan
+        $trendMonthly = $service->monthlyTrend($query);
+
+        // Chart 4: Bar — Top 5 Volume per Provinsi
         $provinceData = (clone $query)
             ->select('province', DB::raw('count(*) as total'))
             ->whereNotNull('province')
@@ -86,11 +75,11 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Chart 4: Grouped Bar Chart - Top 5 Vendor Last Mile Performance
+        // Chart 5: Grouped Bar — Top 5 Vendor Last Mile (Volume & Kepatuhan)
         $vendorData = (clone $query)
             ->select(
-                'vendor_lm', 
-                DB::raw('count(*) as total'), 
+                'vendor_lm',
+                DB::raw('count(*) as total'),
                 DB::raw('SUM(CASE WHEN is_within_sla = 1 THEN 1 ELSE 0 END) as on_time')
             )
             ->whereNotNull('vendor_lm')
@@ -101,32 +90,63 @@ class DashboardController extends Controller
             ->get();
 
         // ----------------------------------------------------
-        // 4. DATA OPSIONAL UNTUK DROPDOWN FILTER
+        // 3. PANEL ANALISIS TAMBAHAN
         // ----------------------------------------------------
-        $provinces = Shipment::select('province')
-            ->whereNotNull('province')
-            ->where('province', '!=', '')
-            ->distinct()
-            ->orderBy('province')
-            ->pluck('province');
 
-        $vendors = Vendor::orderBy('name')->get();
+        // Funnel kepatuhan SLA per tahap (result_* column query-time)
+        $slaStageBreakdown = $service->slaStageBreakdown($query);
 
-        // Render ke View Dashboard
+        // Rata-rata lead time (hari)
+        $leadTimes = $service->leadTimes($query);
+
+        // Vendor dengan over-SLA tertinggi
+        $worstVendors = $service->worstVendors($query);
+
+        // Provinsi & kota undelivered terbanyak
+        $worstRegions = $service->worstRegions($query);
+
+        // Issue terbuka sesuai filter saat ini
+        $issues = $service->openIssues($request);
+        $openIssues = $issues['items'];
+        $issuesTotal = $issues['total'];
+
+        // Import terakhir yang sukses (indikator kesegaran data)
+        $latestImport = $service->latestImport();
+
+        // Table dispatch (DR-05) — 10 pengiriman terbaru sesuai filter saat ini
+        $recentShipments = $service->shipmentQuery($request)
+            ->orderByDesc('ho_date')
+            ->limit(10)
+            ->get(['id', 'waybill_no', 'ho_date', 'province', 'city_regency', 'vendor_lm', 'final_status', 'is_within_sla']);
+
+        // ----------------------------------------------------
+        // 4. DATA DROPDOWN FILTER
+        // ----------------------------------------------------
+        $filterOptions = $service->filterOptions($request);
+        extract($filterOptions);
+
         return view('dashboard.index', compact(
-            'totalShipments',
-            'completed',
-            'undelivered',
-            'onDelivery',
-            'withinSla',
-            'overSla',
-            'slaAchievementRate',
-            'statusChartData',
-            'slaChartData',
+            'kpis',
+            'prevKpis',
+            'deltas',
+            'statusChart',
+            'slaChart',
+            'trend',
+            'trendMonthly',
             'provinceData',
             'vendorData',
+            'slaStageBreakdown',
+            'leadTimes',
+            'worstVendors',
+            'worstRegions',
+            'openIssues',
+            'issuesTotal',
+            'latestImport',
+            'recentShipments',
             'provinces',
-            'vendors'
+            'cities',
+            'vendors',
+            'statuses'
         ));
     }
 }
