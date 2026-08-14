@@ -56,4 +56,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+
+    // Fallback agar /logout tidak pernah 404 (beberapa browser/ekstensi
+    // mengubah form logout menjadi GET). Jalur utama tetap POST (dengan CSRF).
+    Route::get('logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->name('logout.get');
 });

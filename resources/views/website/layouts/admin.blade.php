@@ -43,6 +43,7 @@
                     </a>
                     <form method="POST" action="{{ route('logout') }}" class="ml-2">
                         @csrf
+                        <input type="hidden" name="website_logout" value="1">
                         <button type="submit"
                                 class="px-4 py-2 rounded-lg text-sm font-semibold text-anl-amber border border-anl-amber/40 hover:bg-anl-amber hover:text-anl-navy transition-colors">
                             Keluar
