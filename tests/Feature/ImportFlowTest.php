@@ -113,6 +113,9 @@ class ImportFlowTest extends TestCase
         $this->assertSame('result_pickup_for_panthera', ShipmentRowNormalizer::canonicalKey('Result Pickup for DB'));
         $this->assertSame('sla', ShipmentRowNormalizer::canonicalKey('SLA for DB'));
         $this->assertSame('result_delivery_for_panthera', ShipmentRowNormalizer::canonicalKey('Result Delivery for DB'));
+        $this->assertSame('nama_sekolah', ShipmentRowNormalizer::canonicalKey('Nama Sekolah'));
+        $this->assertSame('nama_sekolah', ShipmentRowNormalizer::canonicalKey('Sekolah'));
+        $this->assertSame('nama_sekolah', ShipmentRowNormalizer::canonicalKey('Nama Sekolah / NPSN'));
         $this->assertNull(ShipmentRowNormalizer::canonicalKey('Kolom Tidak Dikenal'));
     }
 
@@ -135,12 +138,13 @@ class ImportFlowTest extends TestCase
             'Tgl HO dari SarTrans', 'ETA Pickup', 'SLA Pickup', 'Result Pickup for DB',
             'ETA Delivery', 'SLA for DB', 'Result Delivery for DB', 'SLA LM', 'Result LM',
             'SLA FOR VENDOR', 'Result For Vendor', 'Status Update', 'Status Akhir',
+            'Nama Sekolah',
         ];
         $dbRow = [
             'SHP-DB-001', 'NPSN-DB-1', 'MNF-DB-1', 'Vendor Synth', 'Provinsi X', 'Kota Y',
             '15/01/2026', '16/01/2026', 'On Time', 'Berhasil Pickup',
             '17/01/2026', 'On Time', 'Berhasil Dikirim', 'On Time', 'OK', 'On Time', 'OK',
-            'Selesai', 'Delivered',
+            'Selesai', 'Delivered', 'SDN 01 Merdeka',
         ];
 
         $this->makeWorkbook($path, [
@@ -168,6 +172,7 @@ class ImportFlowTest extends TestCase
         $this->assertSame('NPSN-DB-1', $row->npsn);
         $this->assertSame('MNF-DB-1', $row->manifest_no);
         $this->assertSame('Kota Y', $row->city_regency);
+        $this->assertSame('SDN 01 Merdeka', $row->school_name);
         $this->assertSame('Berhasil Pickup', $row->pickup_result);
         $this->assertSame('On Time', $row->delivery_sla_status);
         $this->assertSame('Berhasil Dikirim', $row->delivery_result);

@@ -25,6 +25,20 @@ class ShipmentRowNormalizer
         'resultdeliveryfordb' => 'result_delivery_for_panthera', // 'Result Delivery for DB'
     ];
 
+    /**
+     * Kolom opsional yang tetap ditangkap dari Excel (dipetakan ke field
+     * terkait), namun tidak divalidasi sebagai kolom wajib.
+     */
+    public const OPTIONAL_HEADERS = ['nama_sekolah'];
+
+    /**
+     * Alias nama kolom opsional -> nama kanonik opsional.
+     */
+    protected const OPTIONAL_HEADER_ALIASES = [
+        'sekolah' => 'nama_sekolah',          // 'Sekolah'
+        'namasekolahnpsn' => 'nama_sekolah',  // 'Nama Sekolah / NPSN'
+    ];
+
     public static function valid(array $row): ?string
     {
         if (trim((string) ($row['no_resi'] ?? '')) === '') {
@@ -67,7 +81,13 @@ class ShipmentRowNormalizer
             }
         }
 
-        return self::HEADER_ALIASES[$stripped] ?? null;
+        foreach (self::OPTIONAL_HEADERS as $canonical) {
+            if (self::stripped($canonical) === $stripped) {
+                return $canonical;
+            }
+        }
+
+        return self::OPTIONAL_HEADER_ALIASES[$stripped] ?? self::HEADER_ALIASES[$stripped] ?? null;
     }
 
     /**
