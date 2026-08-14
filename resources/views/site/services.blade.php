@@ -18,57 +18,26 @@
     <section class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- LTL -->
-                <div class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-navy to-[#16345C] flex items-center justify-center overflow-hidden">
-                        <svg class="w-28 h-28 text-anl-blue/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-anl-amber text-anl-navy text-xs font-bold tracking-wider uppercase shadow-lg">Retail</span>
+                @foreach ($services as $service)
+                    <div class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
+                        <div class="relative h-44 bg-gradient-to-br from-anl-navy to-anl-blue flex items-center justify-center overflow-hidden">
+                            @if ($service->icon_image)
+                                <img src="{{ asset('storage/'.$service->icon_image) }}" alt="Ikon {{ $service->name }}" class="w-28 h-28 object-contain">
+                            @elseif ($service->icon_svg)
+                                <svg class="w-28 h-28 text-anl-blue/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="{{ $service->icon_svg }}" />
+                                </svg>
+                            @endif
+                            @if ($service->badge)
+                                <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-anl-amber text-anl-navy text-xs font-bold tracking-wider uppercase shadow-lg">{{ $service->badge }}</span>
+                            @endif
+                        </div>
+                        <div class="p-7">
+                            <h3 class="text-xl font-bold text-slate-900">{{ $service->name }}</h3>
+                            <p class="mt-3 text-sm text-slate-600 leading-relaxed">{{ $service->description }}</p>
+                        </div>
                     </div>
-                    <div class="p-7">
-                        <h3 class="text-xl font-bold text-slate-900">Less Than Truckload <span class="text-anl-blue">(LTL)</span></h3>
-                        <p class="mt-3 text-sm text-slate-600 leading-relaxed">
-                            Pengiriman Retail / Parsial — menggabungkan muatan beberapa pengirim dalam satu truk sehingga
-                            biaya lebih efisien untuk kiriman skala kecil hingga menengah.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- FTL -->
-                <div class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-blue to-[#2E6E0F] flex items-center justify-center overflow-hidden">
-                        <svg class="w-28 h-28 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/>
-                        </svg>
-                        <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-white text-anl-blue text-xs font-bold tracking-wider uppercase shadow-lg">Charter</span>
-                    </div>
-                    <div class="p-7">
-                        <h3 class="text-xl font-bold text-slate-900">Full Truckload <span class="text-anl-blue">(FTL)</span></h3>
-                        <p class="mt-3 text-sm text-slate-600 leading-relaxed">
-                            Sewa Truk / Charter Penuh — penyewaan armada penuh untuk kebutuhan distribusi dengan volume besar,
-                            rute khusus, dan prioritas pengiriman.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Project Logistics -->
-                <div class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-amber to-[#4DA81F] flex items-center justify-center overflow-hidden">
-                        <svg class="w-28 h-28 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8M9 12h6"/>
-                        </svg>
-                        <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-anl-navy text-anl-amber text-xs font-bold tracking-wider uppercase shadow-lg">Custom Cargo</span>
-                    </div>
-                    <div class="p-7">
-                        <h3 class="text-xl font-bold text-slate-900">Project Logistics</h3>
-                        <p class="mt-3 text-sm text-slate-600 leading-relaxed">
-                            Pengiriman kargo khusus & project logistics — penanganan muatan berukuran/berat ekstra, alat berat,
-                            dan kebutuhan proyek dengan perencanaan menyeluruh.
-                        </p>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -83,19 +52,19 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach ([
-                    ['Darat', 'Armada trucking untuk rute antar kota & antar pulau di Pulau Sumatera dan sekitarnya.', 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
-                    ['Laut', 'Pengangkutan muatan antar pulau dengan perencanaan logistik matang dan penanganan aman.', 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
-                    ['Udara', 'Pengiriman cepat untuk kebutuhan mendesak dengan prioritas penanganan dan ketepatan waktu.', 'M12 19V9m0 0l-4 4m4-4l4 4M12 3a9 9 0 110 16 9 9 0 010-16z'],
-                ] as [$name, $desc, $icon])
+                @foreach ($moda as $item)
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] p-7 hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                        <div class="w-12 h-12 rounded-xl bg-anl-blue-light flex items-center justify-center text-anl-blue mb-4">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}" />
-                            </svg>
+                        <div class="w-12 h-12 rounded-xl bg-anl-blue-light flex items-center justify-center text-anl-blue mb-4 overflow-hidden">
+                            @if ($item->icon_image)
+                                <img src="{{ asset('storage/'.$item->icon_image) }}" alt="Ikon {{ $item->name }}" class="w-full h-full object-contain">
+                            @elseif ($item->icon_svg)
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item->icon_svg }}" />
+                                </svg>
+                            @endif
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900">{{ $name }}</h3>
-                        <p class="mt-3 text-sm text-slate-600 leading-relaxed">{{ $desc }}</p>
+                        <h3 class="text-lg font-bold text-slate-900">{{ $item->name }}</h3>
+                        <p class="mt-3 text-sm text-slate-600 leading-relaxed">{{ $item->description }}</p>
                     </div>
                 @endforeach
             </div>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\Post;
+use App\Models\Service;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,16 +24,30 @@ class SiteController extends Controller
             ->take(3)
             ->get();
 
-        $clientLogos = collect(glob(public_path('images/clients/*')))
-            ->filter(fn ($path) => is_file($path))
-            ->map(fn ($path) => [
-                'url' => asset('images/clients/'.basename($path)),
-                'name' => pathinfo($path, PATHINFO_FILENAME),
-            ])
-            ->values()
-            ->all();
+        $services = Service::active()
+            ->section('layanan')
+            ->orderBy('sort_order')
+            ->get();
 
-        return view('site.home', compact('latestPosts', 'clientLogos'));
+        $clients = Client::active()
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn (Client $client) => [
+                'url' => asset('storage/'.$client->image_path),
+                'name' => $client->name,
+            ]);
+
+        if ($clients->isEmpty()) {
+            $clients = collect(glob(public_path('images/clients/*')))
+                ->filter(fn ($path) => is_file($path))
+                ->map(fn ($path) => [
+                    'url' => asset('images/clients/'.basename($path)),
+                    'name' => pathinfo($path, PATHINFO_FILENAME),
+                ])
+                ->values();
+        }
+
+        return view('site.home', compact('latestPosts', 'services', 'clients'));
     }
 
     public function about(): View
@@ -41,7 +57,17 @@ class SiteController extends Controller
 
     public function services(): View
     {
-        return view('site.services');
+        $services = Service::active()
+            ->section('layanan')
+            ->orderBy('sort_order')
+            ->get();
+
+        $moda = Service::active()
+            ->section('moda')
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('site.services', compact('services', 'moda'));
     }
 
     public function contact(): View

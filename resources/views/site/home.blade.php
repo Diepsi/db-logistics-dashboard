@@ -173,48 +173,26 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- LTL -->
-                <div x-reveal class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-navy to-[#16345C] flex items-center justify-center overflow-hidden">
-                        <svg class="w-28 h-28 text-anl-blue/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-anl-amber text-anl-navy text-xs font-bold tracking-wider uppercase shadow-lg">Retail</span>
+                @foreach ($services as $i => $service)
+                    <div x-reveal {{ $i > 0 ? 'x-reveal.delay' : '' }} class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
+                        <div class="relative h-44 bg-gradient-to-br from-anl-navy to-anl-blue flex items-center justify-center overflow-hidden">
+                            @if ($service->icon_image)
+                                <img src="{{ asset('storage/'.$service->icon_image) }}" alt="Ikon {{ $service->name }}" class="w-28 h-28 object-contain">
+                            @elseif ($service->icon_svg)
+                                <svg class="w-28 h-28 text-anl-blue/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="{{ $service->icon_svg }}" />
+                                </svg>
+                            @endif
+                            @if ($service->badge)
+                                <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-anl-amber text-anl-navy text-xs font-bold tracking-wider uppercase shadow-lg">{{ $service->badge }}</span>
+                            @endif
+                        </div>
+                        <div class="p-7">
+                            <h3 class="text-xl font-bold text-slate-900">{{ $service->name }}</h3>
+                            <p class="mt-3 text-slate-600 leading-relaxed text-sm">{{ $service->description }}</p>
+                        </div>
                     </div>
-                    <div class="p-7">
-                        <h3 class="text-xl font-bold text-slate-900">Less Than Truckload <span class="text-anl-blue">(LTL)</span></h3>
-                        <p class="mt-3 text-slate-600 leading-relaxed text-sm">Pengiriman Retail / Parsial — menggabungkan muatan beberapa pengirim dalam satu truk sehingga biaya lebih efisien untuk kiriman skala kecil hingga menengah.</p>
-                    </div>
-                </div>
-
-                <!-- FTL -->
-                <div x-reveal x-reveal.delay class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-blue to-[#2E6E0F] flex items-center justify-center overflow-hidden">
-                        <svg class="w-28 h-28 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/>
-                        </svg>
-                        <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-white text-anl-blue text-xs font-bold tracking-wider uppercase shadow-lg">Charter</span>
-                    </div>
-                    <div class="p-7">
-                        <h3 class="text-xl font-bold text-slate-900">Full Truckload <span class="text-anl-blue">(FTL)</span></h3>
-                        <p class="mt-3 text-slate-600 leading-relaxed text-sm">Sewa Truk / Charter Penuh — penyewaan armada penuh untuk kebutuhan distribusi dengan volume besar, rute khusus, dan prioritas pengiriman.</p>
-                    </div>
-                </div>
-
-                <!-- Project Logistics -->
-                <div x-reveal x-reveal.delay class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-amber to-[#4DA81F] flex items-center justify-center overflow-hidden">
-                        <svg class="w-28 h-28 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8M9 12h6"/>
-                        </svg>
-                        <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-anl-navy text-anl-amber text-xs font-bold tracking-wider uppercase shadow-lg">Custom Cargo</span>
-                    </div>
-                    <div class="p-7">
-                        <h3 class="text-xl font-bold text-slate-900">Project Logistics</h3>
-                        <p class="mt-3 text-slate-600 leading-relaxed text-sm">Pengiriman kargo khusus & project logistics — penanganan muatan berukuran/berat ekstra, alat berat, dan kebutuhan proyek dengan perencanaan menyeluruh.</p>
-                    </div>
-                </div>
+                @endforeach
             </div>
 
             <div class="text-center mt-12">
@@ -328,7 +306,7 @@
     </section>
 
     <!-- ============ CLIENTS / PARTNERS ============ -->
-    @if (!empty($clientLogos))
+    @if (!empty($clients))
     <section class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-12" x-reveal>
@@ -340,7 +318,7 @@
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center" x-reveal>
-                @foreach ($clientLogos as $logo)
+                @foreach ($clients as $logo)
                     <div class="bg-white rounded-2xl border border-slate-200 p-6 flex items-center justify-center h-24 grayscale hover:grayscale-0 hover:border-anl-blue/40 hover:shadow-md transition-all duration-300">
                         <img src="{{ $logo['url'] }}" alt="{{ $logo['name'] }}" class="max-h-12 w-auto object-contain" loading="lazy">
                     </div>
