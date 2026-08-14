@@ -17,11 +17,11 @@
     <body class="font-sans antialiased bg-anl-navy">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
             <div class="mb-6 flex flex-col items-center">
-                <div class="w-16 h-16 rounded-xl bg-anl-gold flex items-center justify-center text-anl-navy font-extrabold text-2xl shadow-lg">
+                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-anl-blue to-anl-navy flex items-center justify-center text-white font-extrabold text-2xl shadow-lg">
                     ANL
                 </div>
                 <p class="mt-3 text-white font-bold tracking-wider text-lg">AMANAH NUSANTARA LOGISTIK</p>
-                <p class="text-[11px] text-anl-gold font-semibold tracking-widest uppercase">Operational Dashboard Access</p>
+                <p class="text-[11px] text-anl-amber font-semibold tracking-widest uppercase">Operational Dashboard Access</p>
             </div>
 
             <div class="w-full sm:max-w-md px-6 py-4 bg-white shadow-xl overflow-hidden sm:rounded-lg">
@@ -29,7 +29,7 @@
             </div>
 
             <div class="mt-6">
-                <a href="{{ route('home') }}" class="text-xs text-gray-400 hover:text-anl-gold transition-colors">
+                <a href="{{ route('home') }}" class="text-xs text-gray-400 hover:text-anl-amber transition-colors">
                     &larr; Kembali ke Website
                 </a>
             </div>

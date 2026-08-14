@@ -44,7 +44,7 @@
                 </a>
             @endif
 
-            <x-primary-button class="ms-3 !bg-anl-navy hover:!bg-anl-navy-light focus:!ring-anl-gold">
+            <x-primary-button class="ms-3 !bg-anl-blue hover:!bg-anl-blue-dark focus:!ring-anl-blue">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>

@@ -2,77 +2,98 @@
     <x-slot name="title">Kontak</x-slot>
 
     <!-- HEADER -->
-    <section class="bg-anl-navy text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-            <p class="text-anl-gold font-semibold tracking-widest uppercase text-sm mb-3">Hubungi Kami</p>
-            <h1 class="text-4xl font-extrabold">Kontak</h1>
+    <section class="relative overflow-hidden bg-gradient-to-br from-anl-navy to-anl-navy-dark text-white">
+        <div class="absolute -top-24 right-0 w-96 h-96 rounded-full bg-anl-blue/20 blur-3xl pointer-events-none"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+            <p class="text-anl-amber font-bold tracking-widest uppercase text-sm mb-3">Get In Touch</p>
+            <h1 class="text-4xl font-extrabold tracking-tight">Kontak</h1>
+            <p class="mt-4 text-slate-300 max-w-2xl leading-relaxed">
+                Kami siap mendukung kebutuhan distribusi bisnis Anda dengan layanan yang andal, aman, dan tepat waktu.
+            </p>
         </div>
     </section>
 
-    <!-- INFO KONTAK -->
-    <section class="py-16 lg:py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <!-- Alamat & Kontak -->
-                <div>
-                    <h2 class="text-2xl font-extrabold text-anl-navy mb-6">Info Kontak</h2>
-                    <ul class="space-y-5">
+    <!-- INFO KONTAK + FORM -->
+    <section class="py-20 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <!-- Form -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] p-8">
+                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-2">Kirim Pesan</h2>
+                <p class="text-sm text-slate-600 mb-6">Isi formulir berikut untuk permintaan penawaran, dan tim kami akan segera menghubungi Anda.</p>
+
+                <form method="POST" action="{{ route('contact') }}" class="space-y-5">
+                    @csrf
+                    <div>
+                        <x-input-label for="name" :value="__('Nama Lengkap')" />
+                        <x-text-input id="name" name="name" type="text" class="mt-1 block w-full rounded-xl border-slate-300" placeholder="Nama Anda" />
+                    </div>
+                    <div>
+                        <x-input-label for="email" :value="__('Email')" />
+                        <x-text-input id="email" name="email" type="email" class="mt-1 block w-full rounded-xl border-slate-300" placeholder="email@contoh.com" />
+                    </div>
+                    <div>
+                        <x-input-label for="phone" :value="__('No. Telepon')" />
+                        <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full rounded-xl border-slate-300" placeholder="+62 813-6232-3510" />
+                    </div>
+                    <div>
+                        <x-input-label for="message" :value="__('Pesan')" />
+                        <textarea id="message" name="message" rows="4" class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-anl-blue focus:ring-anl-blue" placeholder="Tuliskan kebutuhan logistik Anda..."></textarea>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full sm:w-auto min-h-[44px] px-7 py-3 rounded-xl bg-anl-blue text-white font-bold shadow-md shadow-anl-blue/20 hover:bg-anl-blue-dark transition-all duration-300">
+                            Kirim Pesan
+                        </button>
+                    </div>
+                </form>
+
+                @if(session('message'))
+                    <div class="mt-5 p-4 rounded-xl bg-green-50 border border-green-200 text-sm text-green-800">
+                        {{ session('message') }}
+                    </div>
+                @endif
+            </div>
+
+            <!-- Kartu Kontak -->
+            <div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] p-8">
+                    <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-6">Info Kontak</h2>
+                    <ul class="space-y-6">
                         @foreach ([
-                            ['Alamat', 'Jl. Raya Logistik No. 12, Jakarta Selatan, DKI Jakarta', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1m-6 0h6'],
-                            ['Email', 'info@amanahnusantaralogistik.id', 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
-                            ['Telepon / WhatsApp', '+62 812-3456-7890', 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'],
-                            ['Jam Operasional', 'Senin - Sabtu, 08.00 - 17.00 WIB', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ] as [$label, $value, $icon])
+                            ['Alamat', 'Jl. Letda Natsir No.10A, Bojong Kulur, Kec. Gn. Putri, Kabupaten Bogor, Jawa Barat 16968', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1m-6 0h6', null, 'blue'],
+                            ['Telepon / WhatsApp', '+62 813-6232-3510', 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z', 'https://wa.me/6281362323510', 'blue'],
+                            ['Email Marketing', 'marketing@amanahlogistik.co.id', 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'mailto:marketing@amanahlogistik.co.id', 'amber'],
+                            ['Email Office', 'office@dblogistics.co.id', 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'mailto:office@dblogistics.co.id', 'blue'],
+                        ] as [$label, $value, $icon, $href, $tone])
                             <li class="flex space-x-4">
-                                <div class="w-11 h-11 rounded-xl bg-anl-navy flex items-center justify-center text-anl-gold shrink-0">
+                                <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 {{ $tone === 'amber' ? 'bg-anl-amber-light text-anl-amber' : 'bg-anl-blue-light text-anl-blue' }}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-anl-navy text-sm uppercase tracking-wide">{{ $label }}</h3>
-                                    <p class="text-gray-600 mt-1">{{ $value }}</p>
+                                    <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wide">{{ $label }}</h3>
+                                    @if ($href)
+                                        <a href="{{ $href }}" target="_blank" rel="noopener" class="text-slate-600 mt-1 block hover:text-anl-blue transition-colors">{{ $value }}</a>
+                                    @else
+                                        <p class="text-slate-600 mt-1">{{ $value }}</p>
+                                    @endif
                                 </div>
                             </li>
                         @endforeach
                     </ul>
                 </div>
 
-                <!-- Form Kontak -->
-                <div class="bg-gray-50 rounded-2xl border border-gray-200 p-8">
-                    <h2 class="text-2xl font-extrabold text-anl-navy mb-2">Kirim Pesan</h2>
-                    <p class="text-sm text-gray-600 mb-6">Isi formulir berikut dan tim kami akan segera menghubungi Anda.</p>
-
-                    <form method="POST" action="{{ route('contact') }}" class="space-y-5">
-                        @csrf
-                        <div>
-                            <x-input-label for="name" :value="__('Nama Lengkap')" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" placeholder="Nama Anda" />
-                        </div>
-                        <div>
-                            <x-input-label for="email" :value="__('Email')" />
-                            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" placeholder="email@contoh.com" />
-                        </div>
-                        <div>
-                            <x-input-label for="phone" :value="__('No. Telepon')" />
-                            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" placeholder="+62 812-3456-7890" />
-                        </div>
-                        <div>
-                            <x-input-label for="message" :value="__('Pesan')" />
-                            <textarea id="message" name="message" rows="4" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-anl-navy focus:ring-anl-navy" placeholder="Tuliskan kebutuhan logistik Anda..."></textarea>
-                        </div>
-                        <div>
-                            <x-primary-button class="!bg-anl-gold hover:!bg-anl-gold-dark">
-                                {{ __('Kirim Pesan') }}
-                            </x-primary-button>
-                        </div>
-                    </form>
-
-                    @if(session('message'))
-                        <div class="mt-4 p-4 rounded-lg bg-anl-gold/10 border border-anl-gold/30 text-sm text-anl-navy">
-                            {{ session('message') }}
-                        </div>
-                    @endif
+                <!-- Google Maps -->
+                <div class="mt-6 rounded-2xl overflow-hidden border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)]">
+                    <iframe
+                        src="https://www.google.com/maps?q=Jl.%20Letda%20Natsir%20No.10A%2C%20Bojong%20Kulur%2C%20Gunung%20Putri%2C%20Bogor%2C%20Jawa%20Barat&output=embed"
+                        class="w-full h-64 grayscale-[20%]"
+                        style="border:0"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Peta lokasi kantor ANL"
+                        allowfullscreen>
+                    </iframe>
                 </div>
             </div>
         </div>

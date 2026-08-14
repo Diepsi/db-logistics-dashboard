@@ -20,7 +20,16 @@ class SiteController extends Controller
             ->take(3)
             ->get();
 
-        return view('site.home', compact('latestPosts'));
+        $clientLogos = collect(glob(public_path('images/clients/*')))
+            ->filter(fn ($path) => is_file($path))
+            ->map(fn ($path) => [
+                'url' => asset('images/clients/'.basename($path)),
+                'name' => pathinfo($path, PATHINFO_FILENAME),
+            ])
+            ->values()
+            ->all();
+
+        return view('site.home', compact('latestPosts', 'clientLogos'));
     }
 
     public function about(): View

@@ -10,12 +10,12 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Scripts & Styles (Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-100 min-h-screen flex flex-col">
+<body class="site-root font-sans antialiased bg-slate-100 min-h-screen flex flex-col">
 
     <!-- Topbar -->
     <header class="bg-anl-navy sticky top-0 z-40 shadow-md">
@@ -23,28 +23,28 @@
             <div class="flex items-center justify-between h-16">
 
                 <a href="{{ route('website.posts.index') }}" class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-lg bg-anl-gold flex items-center justify-center text-anl-navy font-extrabold text-sm">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-anl-blue to-anl-navy flex items-center justify-center text-white font-extrabold text-sm shadow-md">
                         ANL
                     </div>
                     <div class="leading-tight">
-                        <span class="text-white font-bold tracking-wider block">KELOLA WEBSITE</span>
-                        <span class="text-[10px] text-anl-gold font-semibold tracking-widest uppercase block">Amanah Nusantara Logistik</span>
+                        <span class="text-white font-extrabold tracking-wider block">KELOLA WEBSITE</span>
+                        <span class="text-[10px] text-anl-amber font-bold tracking-widest uppercase block">Amanah Nusantara Logistik</span>
                     </div>
                 </a>
 
                 <div class="flex items-center space-x-1">
                     <a href="{{ route('website.posts.index') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('website.posts.*') ? 'bg-white/10 text-anl-gold font-semibold' : 'text-gray-300 hover:text-white hover:bg-white/5' }}">
+                       class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors {{ request()->routeIs('website.posts.*') ? 'bg-white/10 text-anl-amber' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
                         Kelola Berita
                     </a>
                     <a href="{{ route('home') }}" target="_blank"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                       class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-colors">
                         Lihat Website
                     </a>
                     <form method="POST" action="{{ route('logout') }}" class="ml-2">
                         @csrf
                         <button type="submit"
-                                class="px-4 py-2 rounded-lg text-sm font-medium text-anl-gold border border-anl-gold/40 hover:bg-anl-gold hover:text-anl-navy transition-colors">
+                                class="px-4 py-2 rounded-lg text-sm font-semibold text-anl-amber border border-anl-amber/40 hover:bg-anl-amber hover:text-anl-navy transition-colors">
                             Keluar
                         </button>
                     </form>

@@ -27,12 +27,15 @@ export default {
                 },
                 // Warna brand website Amanah Nusantara Logistik (ANL)
                 anl: {
-                    navy: '#0B1F3A',         // Navy Utama (Header/Hero)
-                    'navy-dark': '#081527',  // Navy Tergelap (Footer)
-                    'navy-light': '#16345C', // Navy Hover
-                    gold: '#D4AF37',         // Gold Accent / CTA
-                    'gold-dark': '#B8942C',  // Gold Hover
-                    'gold-light': '#F7EFD4', // Gold Background Halus
+                    navy: '#0F2B48',          // Deep Navy (Hero/Dark Section)
+                    'navy-dark': '#0B132B',   // Midnight Charcoal (Footer)
+                    'navy-light': '#16345C',  // Navy Hover
+                    blue: '#2563EB',          // Royal Blue (Tombol Utama / Link Aktif)
+                    'blue-dark': '#1E40AF',   // Blue Hover
+                    'blue-light': '#DBEAFE',  // Tint Background Halus
+                    amber: '#F59E0B',         // Amber Accent (Badge / Highlight)
+                    'amber-dark': '#D97706',  // Amber Hover
+                    'amber-light': '#FEF3C7', // Amber Background Halus
                 }
             }
         },
