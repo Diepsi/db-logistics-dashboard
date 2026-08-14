@@ -2,6 +2,11 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    <div class="text-center mb-6">
+        <h2 class="text-xl font-bold text-anl-navy">Masuk Dashboard Operasional</h2>
+        <p class="text-xs text-gray-500 mt-1">Amanah Nusantara Logistik - Monitoring Pengiriman</p>
+    </div>
+
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
@@ -39,7 +44,7 @@
                 </a>
             @endif
 
-            <x-primary-button class="ms-3">
+            <x-primary-button class="ms-3 !bg-anl-navy hover:!bg-anl-navy-light focus:!ring-anl-gold">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>

@@ -5,14 +5,18 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ShipmentController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return Auth::check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-});
+// ------------------------------------------------------------
+// WEBSITE PUBLIK — Amanah Nusantara Logistik (tanpa autentikasi)
+// Modul terpisah atas permintaan perusahaan (feature/company-website)
+// ------------------------------------------------------------
+Route::get('/', [SiteController::class, 'home'])->name('home');
+Route::get('/tentang', [SiteController::class, 'about'])->name('about');
+Route::get('/layanan', [SiteController::class, 'services'])->name('services');
+Route::get('/kontak', [SiteController::class, 'contact'])->name('contact');
+Route::post('/kontak', [SiteController::class, 'storeContact'])->name('contact.store');
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard KPI & Data Pengiriman (semua role terautentikasi)

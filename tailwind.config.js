@@ -24,6 +24,15 @@ export default {
                     darker: '#030712',       // Surface Elemen Tergelap
                     gray: '#F9FAFB',         // Main Body Background
                     card: '#FFFFFF',         // Card Background
+                },
+                // Warna brand website Amanah Nusantara Logistik (ANL)
+                anl: {
+                    navy: '#0B1F3A',         // Navy Utama (Header/Hero)
+                    'navy-dark': '#081527',  // Navy Tergelap (Footer)
+                    'navy-light': '#16345C', // Navy Hover
+                    gold: '#D4AF37',         // Gold Accent / CTA
+                    'gold-dark': '#B8942C',  // Gold Hover
+                    'gold-light': '#F7EFD4', // Gold Background Halus
                 }
             }
         },

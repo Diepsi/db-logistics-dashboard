@@ -25,6 +25,23 @@ class PageSmokeTest extends TestCase
         $this->get('/reports')->assertRedirect(route('login'));
     }
 
+    public function test_public_website_pages_are_accessible_to_guest(): void
+    {
+        $this->get('/')->assertOk()->assertSee('Amanah Nusantara Logistik');
+        $this->get('/tentang')->assertOk();
+        $this->get('/layanan')->assertOk();
+        $this->get('/kontak')->assertOk();
+    }
+
+    public function test_contact_form_can_be_submitted(): void
+    {
+        $this->post('/kontak', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'message' => 'Ini pesan uji coba',
+        ])->assertRedirect()->assertSessionHas('message');
+    }
+
     public function test_admin_can_access_all_pages(): void
     {
         $admin = $this->createUserWithRole('admin');
