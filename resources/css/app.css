@@ -6,3 +6,8 @@
 .site-root {
     font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
+
+/* Sembunyikan elemen Alpine sebelum diinisialisasi (hindari flicker) */
+[x-cloak] {
+    display: none !important;
+}
