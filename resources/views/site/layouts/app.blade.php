@@ -48,7 +48,7 @@
 
                     <!-- Logo -->
                     <a href="{{ route('home') }}" class="flex items-center py-2 shrink-0" aria-label="Beranda">
-                        <img src="{{ asset('images/logo-anl.jpg') }}" alt="Amanah Nusantara Logistik" class="h-10 w-auto">
+                        <img src="{{ \App\Models\Setting::logoUrl() }}" alt="Amanah Nusantara Logistik" class="h-10 w-auto">
                     </a>
 
                     <!-- Menu Desktop -->
@@ -167,7 +167,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
                 <div class="lg:col-span-2">
                     <div class="flex items-center space-x-3 mb-4">
-                        <img src="{{ asset('images/logo-anl.jpg') }}" alt="Amanah Nusantara Logistik" class="h-9 w-auto">
+                        <img src="{{ \App\Models\Setting::logoUrl() }}" alt="Amanah Nusantara Logistik" class="h-9 w-auto">
                         <div class="leading-tight">
                             <span class="text-xs text-anl-amber font-bold tracking-widest uppercase">Mitra Utama Pelanggan</span>
                         </div>

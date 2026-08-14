@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Client;
 use App\Models\Post;
 use App\Models\Role;
+use App\Models\Service;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -224,5 +227,146 @@ class WebsiteAdminTest extends TestCase
             ->assertOk()
             ->assertSee('Sambutan Direktur')
             ->assertSee('Berita Terbaru');
+    }
+
+    public function test_settings_page_requires_admin_role(): void
+    {
+        $this->get(route('website.settings.index'))
+            ->assertRedirect(route('login'));
+
+        $staff = $this->createUser('staff');
+
+        $this->actingAs($staff)
+            ->get(route('website.settings.index'))
+            ->assertForbidden();
+    }
+
+    public function test_admin_can_access_settings_page(): void
+    {
+        $admin = $this->createUser('admin');
+
+        $this->actingAs($admin)
+            ->get(route('website.settings.index'))
+            ->assertOk()
+            ->assertSee('Pengaturan Website')
+            ->assertSee('Identitas')
+            ->assertSee('Kartu Layanan')
+            ->assertSee('Our Loyal Customers');
+    }
+
+    public function test_logo_can_be_updated_from_settings(): void
+    {
+        Storage::fake('public');
+        $admin = $this->createUser('admin');
+
+        $this->actingAs($admin)
+            ->post(route('website.settings.logo'), [
+                'logo' => UploadedFile::fake()->image('logo.png'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $path = Setting::get('site.logo');
+        $this->assertNotNull($path);
+        Storage::disk('public')->assertExists($path);
+    }
+
+    public function test_services_can_be_updated_from_settings(): void
+    {
+        $admin = $this->createUser('admin');
+        $service = Service::create([
+            'slug' => 'ltl',
+            'section' => 'layanan',
+            'name' => 'Less Than Truckload',
+            'badge' => 'Retail',
+            'description' => 'Deskripsi lama.',
+            'icon_svg' => 'M20 7l-8-4-8 4',
+            'sort_order' => 1,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('website.settings.services'), [
+                'services' => [
+                    $service->id => [
+                        'id' => $service->id,
+                        'name' => 'LTL Edisi Baru',
+                        'badge' => 'Retail Plus',
+                        'description' => 'Deskripsi baru.',
+                    ],
+                ],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $service->refresh();
+        $this->assertSame('LTL Edisi Baru', $service->name);
+        $this->assertSame('Retail Plus', $service->badge);
+        $this->assertSame('Deskripsi baru.', $service->description);
+    }
+
+    public function test_client_logos_can_be_added_reordered_toggled_and_deleted(): void
+    {
+        Storage::fake('public');
+        $admin = $this->createUser('admin');
+        $this->actingAs($admin);
+
+        $this->post(route('website.settings.clients.store'), [
+            'logos' => [
+                UploadedFile::fake()->image('klien-pertama.png'),
+                UploadedFile::fake()->image('klien-kedua.png'),
+            ],
+        ])->assertRedirect()->assertSessionHas('success');
+
+        $this->assertSame(2, Client::count());
+
+        $first = Client::orderBy('sort_order')->first();
+        $second = Client::orderBy('sort_order')->skip(1)->first();
+        $this->assertTrue($first->sort_order < $second->sort_order);
+
+        $this->post(route('website.settings.clients.move', $first), ['direction' => 'down'])
+            ->assertRedirect();
+
+        $first->refresh();
+        $second->refresh();
+        $this->assertTrue($first->sort_order > $second->sort_order);
+
+        $this->patch(route('website.settings.clients.toggle', $first))
+            ->assertRedirect();
+        $first->refresh();
+        $this->assertFalse($first->is_active);
+
+        $this->delete(route('website.settings.clients.destroy', $first))
+            ->assertRedirect();
+        $this->assertSame(1, Client::count());
+    }
+
+    public function test_public_home_renders_services_and_clients_from_database(): void
+    {
+        $admin = $this->createUser('admin');
+
+        Service::create([
+            'slug' => 'ltl',
+            'section' => 'layanan',
+            'name' => 'Less Than Truckload (LTL)',
+            'badge' => 'Retail',
+            'description' => 'Deskripsi LTL.',
+            'icon_svg' => 'M20 7l-8-4-8 4',
+            'sort_order' => 1,
+        ]);
+
+        Client::create([
+            'name' => 'PT Contoh Mitra',
+            'image_path' => 'uploads/clients/mitra.png',
+            'sort_order' => 1,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Less Than Truckload (LTL)')
+            ->assertSee('PT Contoh Mitra');
+
+        $this->get(route('services'))
+            ->assertOk()
+            ->assertSee('Less Than Truckload (LTL)');
     }
 }

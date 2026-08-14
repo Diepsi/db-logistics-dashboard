@@ -23,7 +23,7 @@
             <div class="flex items-center justify-between h-16">
 
                 <a href="{{ route('website.posts.index') }}" class="flex items-center space-x-3">
-                    <img src="{{ asset('images/logo-anl.jpg') }}" alt="Amanah Nusantara Logistik" class="h-9 w-auto rounded">
+                    <img src="{{ \App\Models\Setting::logoUrl() }}" alt="Amanah Nusantara Logistik" class="h-9 w-auto rounded">
                     <div class="leading-tight">
                         <span class="text-white font-extrabold tracking-wider block">KELOLA WEBSITE</span>
                         <span class="text-[10px] text-anl-amber font-bold tracking-widest uppercase block">Amanah Nusantara Logistik</span>
@@ -34,6 +34,10 @@
                     <a href="{{ route('website.posts.index') }}"
                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors {{ request()->routeIs('website.posts.*') ? 'bg-white/10 text-anl-amber' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
                         Kelola Berita
+                    </a>
+                    <a href="{{ route('website.settings.index') }}"
+                       class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors {{ request()->routeIs('website.settings.*') ? 'bg-white/10 text-anl-amber' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
+                        Pengaturan
                     </a>
                     <a href="{{ route('home') }}" target="_blank"
                        class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-colors">

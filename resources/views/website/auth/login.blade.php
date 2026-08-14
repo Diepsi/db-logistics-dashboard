@@ -19,7 +19,7 @@
 
     <div class="w-full max-w-md">
         <div class="text-center mb-8">
-            <img src="{{ asset('images/logo-anl.jpg') }}" alt="Amanah Nusantara Logistik" class="h-16 w-auto mx-auto mb-4">
+            <img src="{{ \App\Models\Setting::logoUrl() }}" alt="Amanah Nusantara Logistik" class="h-16 w-auto mx-auto mb-4">
             <h1 class="text-2xl font-extrabold text-white">Kelola Website</h1>
             <p class="text-sm text-anl-amber font-semibold mt-1">Login Admin — Amanah Nusantara Logistik</p>
         </div>

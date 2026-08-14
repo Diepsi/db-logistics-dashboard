@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\WebsiteAuthController;
+use App\Http\Controllers\WebsiteSettingController;
 use Illuminate\Support\Facades\Route;
 
 // ------------------------------------------------------------
@@ -34,6 +35,15 @@ Route::post('/website/login', [WebsiteAuthController::class, 'store']);
 // ------------------------------------------------------------
 Route::middleware(['auth', 'role:admin'])->prefix('website')->group(function () {
     Route::resource('posts', PostController::class)->except(['show'])->names('website.posts');
+
+    // Pengaturan konten website (logo, layanan, moda, logo klien)
+    Route::get('/settings', [WebsiteSettingController::class, 'index'])->name('website.settings.index');
+    Route::post('/settings/logo', [WebsiteSettingController::class, 'updateLogo'])->name('website.settings.logo');
+    Route::post('/settings/services', [WebsiteSettingController::class, 'updateServices'])->name('website.settings.services');
+    Route::post('/settings/clients', [WebsiteSettingController::class, 'storeClient'])->name('website.settings.clients.store');
+    Route::delete('/settings/clients/{client}', [WebsiteSettingController::class, 'destroyClient'])->name('website.settings.clients.destroy');
+    Route::patch('/settings/clients/{client}/toggle', [WebsiteSettingController::class, 'toggleClient'])->name('website.settings.clients.toggle');
+    Route::post('/settings/clients/{client}/move', [WebsiteSettingController::class, 'moveClient'])->name('website.settings.clients.move');
 });
 
 Route::middleware(['auth'])->group(function () {
