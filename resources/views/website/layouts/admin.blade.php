@@ -23,9 +23,7 @@
             <div class="flex items-center justify-between h-16">
 
                 <a href="{{ route('website.posts.index') }}" class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-anl-blue to-anl-navy flex items-center justify-center text-white font-extrabold text-sm shadow-md">
-                        ANL
-                    </div>
+                    <img src="{{ asset('images/logo-anl.jpg') }}" alt="Amanah Nusantara Logistik" class="h-9 w-auto rounded">
                     <div class="leading-tight">
                         <span class="text-white font-extrabold tracking-wider block">KELOLA WEBSITE</span>
                         <span class="text-[10px] text-anl-amber font-bold tracking-widest uppercase block">Amanah Nusantara Logistik</span>

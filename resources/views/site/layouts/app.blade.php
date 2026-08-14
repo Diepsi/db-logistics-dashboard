@@ -47,14 +47,8 @@
                 <div class="flex items-center justify-between h-16">
 
                     <!-- Logo -->
-                    <a href="{{ route('home') }}" class="flex items-center gap-3 py-2 shrink-0" aria-label="Beranda">
-                        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-anl-blue to-anl-navy flex items-center justify-center text-white font-extrabold text-lg shadow-md ring-1 ring-white/60">
-                            ANL
-                        </div>
-                        <div class="leading-tight">
-                            <span class="text-anl-navy font-extrabold tracking-tight block text-[15px]">AMANAH NUSANTARA</span>
-                            <span class="text-[13px] font-bold tracking-[0.25em] text-slate-500 block">LOGISTIK<span class="text-anl-amber">.</span></span>
-                        </div>
+                    <a href="{{ route('home') }}" class="flex items-center py-2 shrink-0" aria-label="Beranda">
+                        <img src="{{ asset('images/logo-anl.jpg') }}" alt="Amanah Nusantara Logistik" class="h-10 w-auto">
                     </a>
 
                     <!-- Menu Desktop -->
@@ -173,9 +167,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
                 <div class="lg:col-span-2">
                     <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-anl-blue to-anl-navy flex items-center justify-center text-white font-extrabold text-sm shadow-md">ANL</div>
+                        <img src="{{ asset('images/logo-anl.jpg') }}" alt="Amanah Nusantara Logistik" class="h-9 w-auto">
                         <div class="leading-tight">
-                            <span class="text-white font-extrabold tracking-wide block">PT. AMANAH NUSANTARA LOGISTIK</span>
                             <span class="text-xs text-anl-amber font-bold tracking-widest uppercase">Mitra Utama Pelanggan</span>
                         </div>
                     </div>
