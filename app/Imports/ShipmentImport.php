@@ -58,9 +58,13 @@ class ShipmentImport implements ToCollection, WithChunkReading, WithHeadingRow, 
         $undeliveredNos = [];
 
         foreach ($rows as $row) {
-            $this->total++;
-
             $row = ShipmentRowNormalizer::normalizeRow(is_array($row) ? $row : $row->toArray());
+
+            if (ShipmentRowNormalizer::isEmptyRow($row)) {
+                continue;
+            }
+
+            $this->total++;
 
             $reason = ShipmentRowNormalizer::valid($row);
             if ($reason !== null) {
