@@ -10,6 +10,7 @@ use App\Models\ShipmentIssue;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Services\ImportService;
+use App\Support\ShipmentRowNormalizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -102,6 +103,107 @@ class ImportFlowTest extends TestCase
             ->post(route('imports.store'), ['excel_file' => $file])
             ->assertRedirect()
             ->assertSessionHas('error', 'Header kolom wajib tidak lengkap. Kolom berikut tidak ditemukan: no_resi');
+    }
+
+    public function test_canonical_key_maps_alias_headers_to_required_columns(): void
+    {
+        $this->assertSame('npsn', ShipmentRowNormalizer::canonicalKey('NPSN / Resi DB'));
+        $this->assertSame('no_manifest', ShipmentRowNormalizer::canonicalKey('Manifest First Mile'));
+        $this->assertSame('kabupatenkota', ShipmentRowNormalizer::canonicalKey('Kota/Kab Tujuan'));
+        $this->assertSame('result_pickup_for_panthera', ShipmentRowNormalizer::canonicalKey('Result Pickup for DB'));
+        $this->assertSame('sla', ShipmentRowNormalizer::canonicalKey('SLA for DB'));
+        $this->assertSame('result_delivery_for_panthera', ShipmentRowNormalizer::canonicalKey('Result Delivery for DB'));
+        $this->assertNull(ShipmentRowNormalizer::canonicalKey('Kolom Tidak Dikenal'));
+    }
+
+    public function test_is_empty_row_detects_missing_no_resi(): void
+    {
+        $this->assertTrue(ShipmentRowNormalizer::isEmptyRow([]));
+        $this->assertTrue(ShipmentRowNormalizer::isEmptyRow(['no_resi' => null]));
+        $this->assertTrue(ShipmentRowNormalizer::isEmptyRow(['no_resi' => '']));
+        $this->assertTrue(ShipmentRowNormalizer::isEmptyRow(['no_resi' => '   ']));
+        $this->assertFalse(ShipmentRowNormalizer::isEmptyRow(['no_resi' => 'SHP-00001']));
+    }
+
+    public function test_preview_and_process_accepts_db_report_template_with_alias_headers(): void
+    {
+        $user = $this->createAdmin();
+        $path = tempnam(sys_get_temp_dir(), 'imp').'.xlsx';
+
+        $dbHeaders = [
+            'No Resi', 'NPSN / Resi DB', 'Manifest First Mile', 'Vendor LM', 'Provinsi', 'Kota/Kab Tujuan',
+            'Tgl HO dari SarTrans', 'ETA Pickup', 'SLA Pickup', 'Result Pickup for DB',
+            'ETA Delivery', 'SLA for DB', 'Result Delivery for DB', 'SLA LM', 'Result LM',
+            'SLA FOR VENDOR', 'Result For Vendor', 'Status Update', 'Status Akhir',
+        ];
+        $dbRow = [
+            'SHP-DB-001', 'NPSN-DB-1', 'MNF-DB-1', 'Vendor Synth', 'Provinsi X', 'Kota Y',
+            '15/01/2026', '16/01/2026', 'On Time', 'Berhasil Pickup',
+            '17/01/2026', 'On Time', 'Berhasil Dikirim', 'On Time', 'OK', 'On Time', 'OK',
+            'Selesai', 'Delivered',
+        ];
+
+        $this->makeWorkbook($path, [
+            'RAW DATA' => [$dbHeaders, $dbRow],
+        ]);
+
+        $file = new UploadedFile($path, 'Report Pengiriman DB.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+        $service = app(ImportService::class);
+
+        $preview = $service->preview($file);
+        $this->assertSame(1, $preview['total']);
+        $this->assertSame(1, $preview['valid']);
+        $this->assertSame(0, $preview['invalid']);
+
+        $batch = ImportBatch::create([
+            'file_name' => 'Report Pengiriman DB.xlsx',
+            'uploaded_by' => $user->id,
+            'status' => 'processing',
+        ]);
+
+        $result = $service->process($preview['token'], $batch->id);
+        $this->assertSame(1, $result['new_rows']);
+
+        $row = Shipment::where('waybill_no', 'SHP-DB-001')->first();
+        $this->assertSame('NPSN-DB-1', $row->npsn);
+        $this->assertSame('MNF-DB-1', $row->manifest_no);
+        $this->assertSame('Kota Y', $row->city_regency);
+        $this->assertSame('Berhasil Pickup', $row->pickup_result);
+        $this->assertSame('On Time', $row->delivery_sla_status);
+        $this->assertSame('Berhasil Dikirim', $row->delivery_result);
+    }
+
+    public function test_preview_skips_rows_with_empty_no_resi(): void
+    {
+        $user = $this->createAdmin();
+        $path = tempnam(sys_get_temp_dir(), 'imp').'.xlsx';
+
+        $rows = [self::HEADERS];
+        $rows[] = ['SHP-00001', 'NPSN-1', 'MNF-1', 'Vendor Synth', 'Provinsi X', 'Kota Y', '15/01/2026', '16/01/2026', 'On Time', 'Berhasil Pickup', '17/01/2026', 'On Time', 'Berhasil Dikirim', 'On Time', 'OK', 'On Time', 'OK', 'Selesai', 'Delivered'];
+        $rows[] = ['', 'NPSN-KOSONG-1', 'MNF-KOSONG-1', 'Vendor Synth', 'Provinsi X', 'Kota Y', '15/01/2026', '16/01/2026', 'On Time', 'Berhasil Pickup', '17/01/2026', 'On Time', 'Berhasil Dikirim', 'On Time', 'OK', 'On Time', 'OK', 'Selesai', 'Delivered'];
+        $rows[] = ['   ', 'NPSN-KOSONG-2', 'MNF-KOSONG-2', 'Vendor Synth', 'Provinsi X', 'Kota Y', '15/01/2026', '16/01/2026', 'On Time', 'Berhasil Pickup', '17/01/2026', 'On Time', 'Berhasil Dikirim', 'On Time', 'OK', 'On Time', 'OK', 'Selesai', 'Delivered'];
+        $rows[] = ['SHP-00002', 'NPSN-2', 'MNF-2', 'Vendor Synth', 'Provinsi X', 'Kota Y', '15/01/2026', '16/01/2026', 'On Time', 'Berhasil Pickup', '17/01/2026', 'On Time', 'Berhasil Dikirim', 'On Time', 'OK', 'On Time', 'OK', 'Selesai', 'Delivered'];
+
+        $this->makeWorkbook($path, ['RAW DATA' => $rows]);
+
+        $file = new UploadedFile($path, 'DenganBarisKosong.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+        $service = app(ImportService::class);
+
+        $preview = $service->preview($file);
+        $this->assertSame(2, $preview['total']);
+        $this->assertSame(2, $preview['valid']);
+        $this->assertSame(0, $preview['invalid']);
+        $this->assertSame(0, $preview['duplicate']);
+
+        $batch = ImportBatch::create([
+            'file_name' => 'DenganBarisKosong.xlsx',
+            'uploaded_by' => $user->id,
+            'status' => 'processing',
+        ]);
+
+        $result = $service->process($preview['token'], $batch->id);
+        $this->assertSame(2, $result['new_rows']);
+        $this->assertSame(2, Shipment::count());
     }
 
     public function test_upload_rejects_unsupported_extension(): void

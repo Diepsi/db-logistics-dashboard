@@ -11,6 +11,20 @@ class ShipmentRowNormalizer
         'sla_for_vendor', 'result_for_vendor', 'status_update', 'status_akhir',
     ];
 
+    /**
+     * Nama kolom alternatif/lama dari berbagai template Excel yang dipetakan
+     * ke header kanonik (19 kolom wajib). Key sudah dalam bentuk stripped
+     * (huruf kecil, tanpa spasi/tanda baca).
+     */
+    protected const HEADER_ALIASES = [
+        'npsnresidb' => 'npsn',                         // 'NPSN / Resi DB'
+        'manifestfirstmile' => 'no_manifest',           // 'Manifest First Mile'
+        'kotakabtujuan' => 'kabupatenkota',             // 'Kota/Kab Tujuan'
+        'resultpickupfordb' => 'result_pickup_for_panthera',   // 'Result Pickup for DB'
+        'slafordb' => 'sla',                            // 'SLA for DB'
+        'resultdeliveryfordb' => 'result_delivery_for_panthera', // 'Result Delivery for DB'
+    ];
+
     public static function valid(array $row): ?string
     {
         if (trim((string) ($row['no_resi'] ?? '')) === '') {
@@ -53,7 +67,16 @@ class ShipmentRowNormalizer
             }
         }
 
-        return null;
+        return self::HEADER_ALIASES[$stripped] ?? null;
+    }
+
+    /**
+     * True jika no_resi bernilai null / empty / hanya spasi -> baris dilewati
+     * (tidak dihitung sebagai error validasi import).
+     */
+    public static function isEmptyRow(array $row): bool
+    {
+        return trim((string) ($row['no_resi'] ?? '')) === '';
     }
 
     protected static function stripped(string $key): string

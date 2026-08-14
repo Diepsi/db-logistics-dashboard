@@ -65,6 +65,10 @@ class ImportService
                 $row = $rows->current();
                 $rows->next();
 
+                if (ShipmentRowNormalizer::isEmptyRow($row)) {
+                    continue;
+                }
+
                 $total++;
 
                 $reason = ShipmentRowNormalizer::valid($row);

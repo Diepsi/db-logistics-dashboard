@@ -314,7 +314,7 @@ class ExcelStreamReader
                 public function readCell($columnAddress, $row, $worksheetName = ''): bool
                 {
                     return $row <= $this->maxRows
-                        && Coordinate::columnIndexFromString($columnAddress) <= 52;
+                        && Coordinate::columnIndexFromString($columnAddress) <= ExcelStreamReader::MAX_COLUMN;
                 }
             });
         }
