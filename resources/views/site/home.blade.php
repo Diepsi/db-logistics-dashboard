@@ -23,18 +23,18 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
                 <!-- Kiri: Value Proposition -->
                 <div>
-                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-anl-amber text-xs font-bold tracking-widest uppercase backdrop-blur-sm">
+                    <span class="x-animate-fade-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-anl-amber text-xs font-bold tracking-widest uppercase backdrop-blur-sm" style="animation-delay: 0.05s">
                         Mitra Utama Pelanggan
                     </span>
-                    <h1 class="mt-6 text-4xl sm:text-5xl xl:text-6xl font-extrabold leading-[1.15] tracking-tight">
+                    <h1 class="x-animate-fade-up mt-6 text-4xl sm:text-5xl xl:text-6xl font-extrabold leading-[1.15] tracking-tight" style="animation-delay: 0.15s">
                         Solusi Jasa Pengiriman & Logistik Andal ke Seluruh Indonesia
                     </h1>
-                    <p class="mt-6 text-lg text-slate-300 leading-relaxed max-w-xl">
+                    <p class="x-animate-fade-up mt-6 text-lg text-slate-300 leading-relaxed max-w-xl" style="animation-delay: 0.25s">
                         Melayani pengiriman domestik via <span class="text-white font-semibold">Darat</span>,
                         <span class="text-white font-semibold">Laut</span>, dan <span class="text-white font-semibold">Udara</span>
                         dengan tepat, cepat, dan aman.
                     </p>
-                    <div class="mt-9 flex flex-wrap gap-4">
+                    <div class="x-animate-fade-up mt-9 flex flex-wrap gap-4" style="animation-delay: 0.35s">
                         <a href="{{ route('services') }}"
                            class="px-7 py-3.5 min-h-[44px] rounded-xl bg-anl-blue text-white font-bold shadow-lg shadow-anl-blue/30 hover:bg-anl-blue-dark hover:-translate-y-0.5 transition-all duration-300">
                             Layanan Kami
@@ -47,7 +47,7 @@
                 </div>
 
                 <!-- Kanan: Ilustrasi SVG + Floating Badges -->
-                <div class="relative">
+                <div class="x-animate-fade-up relative" style="animation-delay: 0.45s">
                     <div class="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10">
                         <svg viewBox="0 0 520 440" class="w-full h-auto" role="img" aria-label="Ilustrasi jaringan rute pengiriman ANL">
                             <defs>
@@ -56,12 +56,12 @@
                                     <stop offset="100%" stop-color="#0F2B48"/>
                                 </linearGradient>
                                 <linearGradient id="truckGrad" x1="0" y1="0" x2="1" y2="1">
-                                    <stop offset="0%" stop-color="#2563EB"/>
-                                    <stop offset="100%" stop-color="#1E40AF"/>
+                                    <stop offset="0%" stop-color="#399310"/>
+                                    <stop offset="100%" stop-color="#2E6E0F"/>
                                 </linearGradient>
                                 <radialGradient id="orbBlue" cx="30%" cy="20%" r="80%">
-                                    <stop offset="0%" stop-color="#2563EB" stop-opacity="0.5"/>
-                                    <stop offset="100%" stop-color="#2563EB" stop-opacity="0"/>
+                                    <stop offset="0%" stop-color="#399310" stop-opacity="0.5"/>
+                                    <stop offset="100%" stop-color="#399310" stop-opacity="0"/>
                                 </radialGradient>
                             </defs>
                             <rect width="520" height="440" fill="url(#heroBg)"/>
@@ -73,7 +73,7 @@
                             </g>
 
                             <!-- Rute terhubung -->
-                            <g stroke="#60A5FA" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="6 6" fill="none">
+                            <g stroke="#6CCF2E" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="6 6" fill="none">
                                 <path d="M80 90 L220 150 L300 90 L420 130"/>
                                 <path d="M120 330 L240 260 L360 320 L440 270"/>
                                 <path d="M220 150 L240 260 L300 90 L360 320"/>
@@ -81,26 +81,26 @@
                             </g>
 
                             <!-- Node kota -->
-                            <g fill="#F59E0B">
+                            <g fill="#6CCF2E">
                                 <circle cx="80" cy="90" r="7"/>
                                 <circle cx="120" cy="330" r="7"/>
                                 <circle cx="300" cy="90" r="7"/>
                                 <circle cx="440" cy="270" r="7"/>
                                 <circle cx="360" cy="320" r="7"/>
                             </g>
-                            <g fill="#93C5FD">
+                            <g fill="#6CCF2E">
                                 <circle cx="220" cy="150" r="5"/>
                                 <circle cx="240" cy="260" r="5"/>
                                 <circle cx="420" cy="130" r="5"/>
                             </g>
-                            <g fill="#2563EB">
+                            <g fill="#399310">
                                 <circle cx="80" cy="90" r="14" opacity="0.3"/>
                                 <circle cx="440" cy="270" r="14" opacity="0.3"/>
                                 <circle cx="300" cy="90" r="14" opacity="0.3"/>
                             </g>
 
                             <!-- Pin kota -->
-                            <g fill="#F59E0B">
+                            <g fill="#6CCF2E">
                                 <path d="M80 70c-5 0-9 4-9 9 0 6.5 9 15 9 15s9-8.5 9-15c0-5-4-9-9-9zm0 13a4 4 0 110-8 4 4 0 010 8z"/>
                                 <path d="M440 250c-5 0-9 4-9 9 0 6.5 9 15 9 15s9-8.5 9-15c0-5-4-9-9-9zm0 13a4 4 0 110-8 4 4 0 010 8z"/>
                             </g>
@@ -109,18 +109,18 @@
                             <g transform="translate(150 180)">
                                 <rect x="0" y="0" width="150" height="78" rx="10" fill="#ffffff" opacity="0.06"/>
                                 <g transform="translate(12 20)">
-                                    <rect x="0" y="8" width="78" height="38" rx="4" fill="#1E3A5F"/>
+                                    <rect x="0" y="8" width="78" height="38" rx="4" fill="#16345C"/>
                                     <path d="M0 8 V0 H60 L78 8Z" fill="#16345C"/>
-                                    <rect x="88" y="18" width="26" height="28" rx="3" fill="#2563EB"/>
+                                    <rect x="88" y="18" width="26" height="28" rx="3" fill="#399310"/>
                                     <rect x="70" y="0" width="4" height="58" rx="2" fill="#16345C"/>
-                                    <path d="M96 0 h16 v18 h-16z" fill="#1E40AF"/>
+                                    <path d="M96 0 h16 v18 h-16z" fill="#2E6E0F"/>
                                     <g fill="#0F2B48">
                                         <circle cx="20" cy="52" r="10"/>
-                                        <circle cx="20" cy="52" r="5" fill="#F59E0B"/>
+                                        <circle cx="20" cy="52" r="5" fill="#6CCF2E"/>
                                         <circle cx="92" cy="52" r="10"/>
-                                        <circle cx="92" cy="52" r="5" fill="#F59E0B"/>
+                                        <circle cx="92" cy="52" r="5" fill="#6CCF2E"/>
                                     </g>
-                                    <g stroke="#93C5FD" stroke-opacity="0.5" stroke-width="1.5" stroke-dasharray="4 3">
+                                    <g stroke="#6CCF2E" stroke-opacity="0.5" stroke-width="1.5" stroke-dasharray="4 3">
                                         <line x1="8" y1="20" x2="56" y2="20"/>
                                         <line x1="8" y1="30" x2="56" y2="30"/>
                                         <line x1="8" y1="40" x2="56" y2="40"/>
@@ -163,7 +163,7 @@
     <!-- ============ LAYANAN UTAMA ============ -->
     <section class="py-20 lg:py-24 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14">
+            <div class="text-center max-w-2xl mx-auto mb-14" x-reveal>
                 <p class="text-anl-amber font-bold tracking-widest uppercase text-sm">Apa yang Kami Tawarkan</p>
                 <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Layanan Kami</h2>
                 <p class="mt-4 text-slate-600 leading-relaxed">
@@ -174,8 +174,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- LTL -->
-                <div class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-navy to-[#1E3A5F] flex items-center justify-center overflow-hidden">
+                <div x-reveal class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
+                    <div class="relative h-44 bg-gradient-to-br from-anl-navy to-[#16345C] flex items-center justify-center overflow-hidden">
                         <svg class="w-28 h-28 text-anl-blue/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
@@ -188,8 +188,8 @@
                 </div>
 
                 <!-- FTL -->
-                <div class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-blue to-[#1E40AF] flex items-center justify-center overflow-hidden">
+                <div x-reveal x-reveal.delay class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
+                    <div class="relative h-44 bg-gradient-to-br from-anl-blue to-[#2E6E0F] flex items-center justify-center overflow-hidden">
                         <svg class="w-28 h-28 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/>
@@ -203,8 +203,8 @@
                 </div>
 
                 <!-- Project Logistics -->
-                <div class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
-                    <div class="relative h-44 bg-gradient-to-br from-anl-amber to-[#D97706] flex items-center justify-center overflow-hidden">
+                <div x-reveal x-reveal.delay class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/40 transition-all duration-300">
+                    <div class="relative h-44 bg-gradient-to-br from-anl-amber to-[#4DA81F] flex items-center justify-center overflow-hidden">
                         <svg class="w-28 h-28 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8M9 12h6"/>
                         </svg>
@@ -230,21 +230,21 @@
 
     <!-- ============ STATISTIK ============ -->
     <section class="bg-gradient-to-br from-anl-navy to-anl-navy-dark text-white py-14">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-10 text-center" x-reveal>
             <div>
-                <p class="text-4xl font-extrabold text-anl-amber">24+</p>
+                <p class="text-4xl font-extrabold text-anl-amber" x-counter data-counter-value="24" data-counter-duration="1500" data-counter-suffix="+">0+</p>
                 <p class="mt-2 text-sm text-slate-300 uppercase tracking-wider">Cabang Perwakilan</p>
             </div>
             <div>
-                <p class="text-4xl font-extrabold text-anl-amber">3 Moda</p>
+                <p class="text-4xl font-extrabold text-anl-amber" x-counter data-counter-value="3" data-counter-duration="1500" data-counter-suffix=" Moda">0</p>
                 <p class="mt-2 text-sm text-slate-300 uppercase tracking-wider">Darat · Laut · Udara</p>
             </div>
             <div>
-                <p class="text-4xl font-extrabold text-anl-amber">98%</p>
+                <p class="text-4xl font-extrabold text-anl-amber" x-counter data-counter-value="98" data-counter-duration="1800" data-counter-suffix="%">0%</p>
                 <p class="mt-2 text-sm text-slate-300 uppercase tracking-wider">Tepat Waktu</p>
             </div>
             <div>
-                <p class="text-4xl font-extrabold text-anl-amber">24/7</p>
+                <p class="text-4xl font-extrabold text-anl-amber" x-counter data-counter-value="24" data-counter-duration="1500" data-counter-suffix="/7">0/7</p>
                 <p class="mt-2 text-sm text-slate-300 uppercase tracking-wider">Dukungan</p>
             </div>
         </div>
@@ -253,7 +253,7 @@
     <!-- ============ WHY CHOOSE US ============ -->
     <section class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14">
+            <div class="text-center max-w-2xl mx-auto mb-14" x-reveal>
                 <p class="text-anl-amber font-bold tracking-widest uppercase text-sm">Keunggulan Kami</p>
                 <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Mengapa Memilih Kami?</h2>
                 <p class="mt-4 text-slate-600 leading-relaxed">
@@ -268,8 +268,8 @@
                     ['Customized Logistics Solutions', 'Solusi logistik yang dirancang sesuai kebutuhan bisnis Anda — dari volume kecil hingga project berskala besar.', 'M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z', 'amber'],
                     ['Experienced Logistics Experts', 'Didukung tenaga ahli logistik berpengalaman dengan standar operasional yang profesional dan ketat.', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z', 'blue'],
                     ['Real-Time Tracking Systems', 'Sistem pemantauan pengiriman terkini — pantau status setiap kiriman secara real-time hingga tiba di tujuan.', 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', 'amber'],
-                ] as [$title, $desc, $icon, $tone])
-                    <div class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] p-7 hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/60 transition-all duration-300">
+                ] as $i => [$title, $desc, $icon, $tone])
+                    <div x-reveal style="transition-delay: {{ $i * 0.1 }}s" class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] p-7 hover:-translate-y-2 hover:shadow-xl hover:border-anl-blue/60 transition-all duration-300">
                         <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300 {{ $tone === 'blue' ? 'bg-anl-blue-light text-anl-blue group-hover:bg-anl-blue group-hover:text-white' : 'bg-anl-amber-light text-anl-amber group-hover:bg-anl-amber group-hover:text-white' }}">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $icon }}" />
@@ -286,7 +286,7 @@
     <!-- ============ JARINGAN CABANG ============ -->
     <section id="jaringan" class="py-20 lg:py-24 bg-slate-50 scroll-mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-12">
+            <div class="text-center max-w-2xl mx-auto mb-12" x-reveal>
                 <p class="text-anl-amber font-bold tracking-widest uppercase text-sm">Network & Coverage</p>
                 <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Jaringan Cabang Perwakilan</h2>
                 <p class="mt-4 text-slate-600 leading-relaxed">
@@ -331,7 +331,7 @@
     @if (!empty($clientLogos))
     <section class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-12">
+            <div class="text-center max-w-2xl mx-auto mb-12" x-reveal>
                 <p class="text-anl-amber font-bold tracking-widest uppercase text-sm">Kepercayaan</p>
                 <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Our Loyal Customers</h2>
                 <p class="mt-4 text-slate-600 leading-relaxed">
@@ -339,7 +339,7 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center" x-reveal>
                 @foreach ($clientLogos as $logo)
                     <div class="bg-white rounded-2xl border border-slate-200 p-6 flex items-center justify-center h-24 grayscale hover:grayscale-0 hover:border-anl-blue/40 hover:shadow-md transition-all duration-300">
                         <img src="{{ $logo['url'] }}" alt="{{ $logo['name'] }}" class="max-h-12 w-auto object-contain" loading="lazy">
@@ -354,7 +354,7 @@
     @if ($latestPosts->isNotEmpty())
     <section class="py-20 lg:py-24 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-end justify-between mb-12">
+            <div class="flex items-end justify-between mb-12" x-reveal>
                 <div>
                     <p class="text-anl-amber font-bold tracking-widest uppercase text-sm">Informasi & Update</p>
                     <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Berita Terbaru</h2>
@@ -367,7 +367,7 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" x-reveal>
                 @foreach ($latestPosts as $post)
                     <a href="{{ route('berita.show', $post->slug) }}"
                        class="group bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] overflow-hidden hover:-translate-y-2 hover:shadow-xl transition-all duration-300 flex flex-col">

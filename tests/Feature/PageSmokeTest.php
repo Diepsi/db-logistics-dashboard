@@ -50,6 +50,23 @@ class PageSmokeTest extends TestCase
         ])->assertRedirect()->assertSessionHas('message');
     }
 
+    public function test_contact_form_can_be_submitted_via_json(): void
+    {
+        $this->postJson('/kontak', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'phone' => '081362323510',
+            'message' => 'Ini pesan uji coba',
+        ])->assertOk()->assertJsonPath('message', 'Terima kasih! Pesan Anda telah kami terima dan akan segera kami balas.');
+    }
+
+    public function test_contact_form_returns_json_validation_errors(): void
+    {
+        $this->postJson('/kontak', [])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'email', 'message']);
+    }
+
     public function test_admin_can_access_all_pages(): void
     {
         $admin = $this->createUserWithRole('admin');

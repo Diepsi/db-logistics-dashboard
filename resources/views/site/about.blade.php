@@ -91,7 +91,7 @@
                 Hubungi tim kami untuk konsultasi kebutuhan logistik perusahaan Anda secara gratis.
             </p>
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <a href="{{ route('contact') }}" class="px-7 py-3.5 min-h-[44px] rounded-xl bg-anl-amber text-anl-navy font-bold shadow-lg shadow-black/10 hover:bg-[#FBBF24] hover:-translate-y-0.5 transition-all duration-300">
+                <a href="{{ route('contact') }}" class="px-7 py-3.5 min-h-[44px] rounded-xl bg-anl-amber text-anl-navy font-bold shadow-lg shadow-black/10 hover:bg-anl-amber-dark hover:-translate-y-0.5 transition-all duration-300">
                     Hubungi Kami
                 </a>
             </div>

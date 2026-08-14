@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 /**
@@ -66,17 +68,34 @@ class SiteController extends Controller
     /**
      * Simpan pesan dari form kontak (tanpa DB — hanya konfirmasi).
      */
-    public function storeContact(Request $request): RedirectResponse
+    public function storeContact(Request $request): RedirectResponse|JsonResponse
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'message' => ['required', 'string', 'max:2000'],
         ]);
 
-        logger()->info('Pesan baru dari website', $data);
+        if ($validator->fails()) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Data yang diberikan tidak valid.',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
 
-        return back()->with('message', 'Terima kasih! Pesan Anda telah kami terima dan akan segera kami balas.');
+            return back()->withErrors($validator)->withInput();
+        }
+
+        logger()->info('Pesan baru dari website', $validator->validated());
+
+        $message = 'Terima kasih! Pesan Anda telah kami terima dan akan segera kami balas.';
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return back()->with('message', $message);
     }
 }

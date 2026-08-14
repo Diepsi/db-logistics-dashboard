@@ -17,31 +17,50 @@
     <section class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
             <!-- Form -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] p-8">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-[0_10px_30px_-5px_rgba(15,43,72,0.08)] p-8" x-data="contactForm()">
                 <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-2">Kirim Pesan</h2>
                 <p class="text-sm text-slate-600 mb-6">Isi formulir berikut untuk permintaan penawaran, dan tim kami akan segera menghubungi Anda.</p>
 
-                <form method="POST" action="{{ route('contact') }}" class="space-y-5">
+                <div x-show="success" x-cloak class="mb-5 p-4 rounded-xl bg-green-50 border border-green-200 text-sm text-green-800">
+                    Terima kasih! Pesan Anda telah kami terima dan akan segera kami balas.
+                </div>
+                <div x-show="serverError" x-cloak class="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-800" x-text="serverError"></div>
+
+                <form method="POST" action="{{ route('contact') }}" class="space-y-5" @submit.prevent="submit($event)">
                     @csrf
                     <div>
                         <x-input-label for="name" :value="__('Nama Lengkap')" />
-                        <x-text-input id="name" name="name" type="text" class="mt-1 block w-full rounded-xl border-slate-300" placeholder="Nama Anda" />
+                        <x-text-input id="name" name="name" type="text" x-model="name"
+                                      :class="errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''"
+                                      class="mt-1 block w-full rounded-xl border-slate-300" placeholder="Nama Anda" />
+                        <p x-show="errors.name" x-cloak x-text="errors.name.join(', ')" class="mt-1 text-xs text-red-600"></p>
                     </div>
                     <div>
                         <x-input-label for="email" :value="__('Email')" />
-                        <x-text-input id="email" name="email" type="email" class="mt-1 block w-full rounded-xl border-slate-300" placeholder="email@contoh.com" />
+                        <x-text-input id="email" name="email" type="email" x-model="email"
+                                      :class="errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''"
+                                      class="mt-1 block w-full rounded-xl border-slate-300" placeholder="email@contoh.com" />
+                        <p x-show="errors.email" x-cloak x-text="errors.email.join(', ')" class="mt-1 text-xs text-red-600"></p>
                     </div>
                     <div>
                         <x-input-label for="phone" :value="__('No. Telepon')" />
-                        <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full rounded-xl border-slate-300" placeholder="+62 813-6232-3510" />
+                        <x-text-input id="phone" name="phone" type="text" x-model="phone"
+                                      :class="errors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''"
+                                      class="mt-1 block w-full rounded-xl border-slate-300" placeholder="+62 813-6232-3510" />
+                        <p x-show="errors.phone" x-cloak x-text="errors.phone.join(', ')" class="mt-1 text-xs text-red-600"></p>
                     </div>
                     <div>
                         <x-input-label for="message" :value="__('Pesan')" />
-                        <textarea id="message" name="message" rows="4" class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-anl-blue focus:ring-anl-blue" placeholder="Tuliskan kebutuhan logistik Anda..."></textarea>
+                        <textarea id="message" name="message" rows="4" x-model="message"
+                                  :class="errors.message ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'focus:border-anl-blue focus:ring-anl-blue'"
+                                  class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm" placeholder="Tuliskan kebutuhan logistik Anda..."></textarea>
+                        <p x-show="errors.message" x-cloak x-text="errors.message.join(', ')" class="mt-1 text-xs text-red-600"></p>
                     </div>
                     <div>
-                        <button type="submit" class="w-full sm:w-auto min-h-[44px] px-7 py-3 rounded-xl bg-anl-blue text-white font-bold shadow-md shadow-anl-blue/20 hover:bg-anl-blue-dark transition-all duration-300">
-                            Kirim Pesan
+                        <button type="submit" :disabled="sending"
+                                class="w-full sm:w-auto min-h-[44px] px-7 py-3 rounded-xl bg-anl-blue text-white font-bold shadow-md shadow-anl-blue/20 hover:bg-anl-blue-dark disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300">
+                            <span x-show="!sending">Kirim Pesan</span>
+                            <span x-show="sending" x-cloak>Mengirim...</span>
                         </button>
                     </div>
                 </form>

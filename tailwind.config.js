@@ -25,17 +25,17 @@ export default {
                     gray: '#F9FAFB',         // Main Body Background
                     card: '#FFFFFF',         // Card Background
                 },
-                // Warna brand website Amanah Nusantara Logistik (ANL)
+                // Warna brand website Amanah Nusantara Logistik (ANL) — disamakan dengan logo (hijau, hitam, biru dongker)
                 anl: {
-                    navy: '#0F2B48',          // Deep Navy (Hero/Dark Section)
-                    'navy-dark': '#0B132B',   // Midnight Charcoal (Footer)
+                    navy: '#0F2B48',          // Biru Dongker (Hero/Section Gelap)
+                    'navy-dark': '#070A12',   // Hitam Kebiruan (Footer/Navbar)
                     'navy-light': '#16345C',  // Navy Hover
-                    blue: '#2563EB',          // Royal Blue (Tombol Utama / Link Aktif)
-                    'blue-dark': '#1E40AF',   // Blue Hover
-                    'blue-light': '#DBEAFE',  // Tint Background Halus
-                    amber: '#F59E0B',         // Amber Accent (Badge / Highlight)
-                    'amber-dark': '#D97706',  // Amber Hover
-                    'amber-light': '#FEF3C7', // Amber Background Halus
+                    blue: '#399310',          // Hijau Logo (Tombol Utama / Link Aktif)
+                    'blue-dark': '#2E6E0F',   // Hijau Hover
+                    'blue-light': '#EAF5DA',  // Tint Hijau Halus
+                    amber: '#6CCF2E',         // Hijau Terang (Badge / Aksen di atas navy)
+                    'amber-dark': '#4DA81F',  // Aksen Hover
+                    'amber-light': '#EAF5DA', // Background Halus Aksen
                 }
             }
         },
