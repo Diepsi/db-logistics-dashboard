@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,7 +15,12 @@ class SiteController extends Controller
 {
     public function home(): View
     {
-        return view('site.home');
+        $latestPosts = Post::published()
+            ->orderByDesc('published_at')
+            ->take(3)
+            ->get();
+
+        return view('site.home', compact('latestPosts'));
     }
 
     public function about(): View
@@ -30,6 +36,22 @@ class SiteController extends Controller
     public function contact(): View
     {
         return view('site.contact');
+    }
+
+    public function berita(): View
+    {
+        $posts = Post::published()
+            ->orderByDesc('published_at')
+            ->paginate(9);
+
+        return view('site.berita', compact('posts'));
+    }
+
+    public function beritaShow(string $slug): View
+    {
+        $post = Post::published()->where('slug', $slug)->firstOrFail();
+
+        return view('site.berita-detail', compact('post'));
     }
 
     /**

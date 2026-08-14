@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\WebsiteAuthController;
 use Illuminate\Support\Facades\Route;
 
 // ------------------------------------------------------------
@@ -17,6 +19,24 @@ Route::get('/tentang', [SiteController::class, 'about'])->name('about');
 Route::get('/layanan', [SiteController::class, 'services'])->name('services');
 Route::get('/kontak', [SiteController::class, 'contact'])->name('contact');
 Route::post('/kontak', [SiteController::class, 'storeContact'])->name('contact.store');
+Route::get('/berita', [SiteController::class, 'berita'])->name('berita');
+Route::get('/berita/{slug}', [SiteController::class, 'beritaShow'])->name('berita.show');
+
+// ------------------------------------------------------------
+// LOGIN ADMIN WEBSITE (jalur terpisah dari login dashboard).
+// Akun yang sama dengan dashboard, hanya role admin yang dibolehkan.
+// ------------------------------------------------------------
+Route::middleware('guest')->group(function () {
+    Route::get('/website/login', [WebsiteAuthController::class, 'create'])->name('website.login');
+    Route::post('/website/login', [WebsiteAuthController::class, 'store']);
+});
+
+// ------------------------------------------------------------
+// CMS WEBSITE (Berita/Artikel) — khusus admin, lewat jalur login website
+// ------------------------------------------------------------
+Route::middleware(['auth', 'role:admin'])->prefix('website')->group(function () {
+    Route::resource('posts', PostController::class)->except(['show'])->names('website.posts');
+});
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard KPI & Data Pengiriman (semua role terautentikasi)

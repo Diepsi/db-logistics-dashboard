@@ -40,6 +40,7 @@
                             'home' => ['Beranda', route('home')],
                             'about' => ['Tentang', route('about')],
                             'services' => ['Layanan', route('services')],
+                            'berita' => ['Berita', route('berita')],
                             'contact' => ['Kontak', route('contact')],
                         ];
                     @endphp
@@ -97,6 +98,7 @@
                         <li><a href="{{ route('home') }}" class="hover:text-anl-gold transition-colors">Beranda</a></li>
                         <li><a href="{{ route('about') }}" class="hover:text-anl-gold transition-colors">Tentang Kami</a></li>
                         <li><a href="{{ route('services') }}" class="hover:text-anl-gold transition-colors">Layanan</a></li>
+                        <li><a href="{{ route('berita') }}" class="hover:text-anl-gold transition-colors">Berita</a></li>
                         <li><a href="{{ route('contact') }}" class="hover:text-anl-gold transition-colors">Kontak</a></li>
                     </ul>
                 </div>
