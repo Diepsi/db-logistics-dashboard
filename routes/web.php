@@ -2,48 +2,16 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
-use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ShipmentController;
-use App\Http\Controllers\SiteController;
-use App\Http\Controllers\WebsiteAuthController;
-use App\Http\Controllers\WebsiteSettingController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-// ------------------------------------------------------------
-// WEBSITE PUBLIK — Amanah Nusantara Logistik (tanpa autentikasi)
-// Modul terpisah atas permintaan perusahaan (feature/company-website)
-// ------------------------------------------------------------
-Route::get('/', [SiteController::class, 'home'])->name('home');
-Route::get('/tentang', [SiteController::class, 'about'])->name('about');
-Route::get('/layanan', [SiteController::class, 'services'])->name('services');
-Route::get('/kontak', [SiteController::class, 'contact'])->name('contact');
-Route::post('/kontak', [SiteController::class, 'storeContact'])->name('contact.store');
-Route::get('/berita', [SiteController::class, 'berita'])->name('berita');
-Route::get('/berita/{slug}', [SiteController::class, 'beritaShow'])->name('berita.show');
-
-// ------------------------------------------------------------
-// LOGIN ADMIN WEBSITE (jalur terpisah dari login dashboard).
-// Akun yang sama dengan dashboard, hanya role admin yang dibolehkan.
-// ------------------------------------------------------------
-Route::get('/website/login', [WebsiteAuthController::class, 'create'])->name('website.login');
-Route::post('/website/login', [WebsiteAuthController::class, 'store']);
-
-// ------------------------------------------------------------
-// CMS WEBSITE (Berita/Artikel) — khusus admin, lewat jalur login website
-// ------------------------------------------------------------
-Route::middleware(['auth', 'role:admin'])->prefix('website')->group(function () {
-    Route::resource('posts', PostController::class)->except(['show'])->names('website.posts');
-
-    // Pengaturan konten website (logo, layanan, moda, logo klien)
-    Route::get('/settings', [WebsiteSettingController::class, 'index'])->name('website.settings.index');
-    Route::post('/settings/logo', [WebsiteSettingController::class, 'updateLogo'])->name('website.settings.logo');
-    Route::post('/settings/services', [WebsiteSettingController::class, 'updateServices'])->name('website.settings.services');
-    Route::post('/settings/clients', [WebsiteSettingController::class, 'storeClient'])->name('website.settings.clients.store');
-    Route::delete('/settings/clients/{client}', [WebsiteSettingController::class, 'destroyClient'])->name('website.settings.clients.destroy');
-    Route::patch('/settings/clients/{client}/toggle', [WebsiteSettingController::class, 'toggleClient'])->name('website.settings.clients.toggle');
-    Route::post('/settings/clients/{client}/move', [WebsiteSettingController::class, 'moveClient'])->name('website.settings.clients.move');
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -57,6 +25,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/imports', [ImportController::class, 'store'])->name('imports.store');
         Route::post('/imports/process', [ImportController::class, 'process'])->name('imports.process');
         Route::delete('/imports/clear', [ImportController::class, 'clear'])->name('imports.clear');
+
+        // Manajemen User — khusus Admin
+        Route::resource('users', UserController::class)->except(['show']);
     });
 
     // Modul Laporan & Export — Admin & Project Manager

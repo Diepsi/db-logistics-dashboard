@@ -52,18 +52,6 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect('/');
     }
 
-    public function test_users_can_logout_from_website_cms(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->post('/logout', [
-            'website_logout' => '1',
-        ]);
-
-        $this->assertGuest();
-        $response->assertRedirect('/website/login');
-    }
-
     public function test_get_logout_does_not_return_404(): void
     {
         $user = User::factory()->create();

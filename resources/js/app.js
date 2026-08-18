@@ -1,5 +1,4 @@
 
-
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
@@ -57,54 +56,35 @@ Alpine.directive('counter', (el) => {
     observer.observe(el);
 });
 
-Alpine.data('contactForm', () => ({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-    errors: {},
-    sending: false,
-    success: false,
-    serverError: '',
+// Overlay loading halus untuk form filter (x-loading)
+Alpine.directive('loading', (el) => {
+    el.addEventListener('submit', () => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[100] bg-white/70 backdrop-blur-sm flex items-center justify-center page-enter';
+        overlay.innerHTML = `
+            <div class="flex flex-col items-center gap-3">
+                <div class="w-10 h-10 rounded-full border-4 border-dbl-green/30 border-t-dbl-green animate-spin"></div>
+                <span class="text-sm font-bold text-gray-600">Memuat data...</span>
+            </div>`;
+        document.body.appendChild(overlay);
+    });
+});
 
-    submit(event) {
-        this.sending = true;
-        this.errors = {};
-        this.success = false;
-        this.serverError = '';
-
-        const form = event.target;
-
-        fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            body: new FormData(form),
-        })
-            .then(async (response) => {
-                const data = await response.json();
-                if (response.ok) {
-                    this.success = true;
-                    form.reset();
-                    this.name = '';
-                    this.email = '';
-                    this.phone = '';
-                    this.message = '';
-                } else if (data.errors) {
-                    this.errors = data.errors;
-                } else {
-                    this.serverError = data.message || 'Terjadi kesalahan, silakan coba lagi.';
-                }
-            })
-            .catch(() => {
-                this.serverError = 'Terjadi kesalahan jaringan, silakan coba lagi.';
-            })
-            .finally(() => {
-                this.sending = false;
-            });
-    },
-}));
+// Default styling Chart.js agar konsisten di semua halaman
+if (window.Chart) {
+    Chart.defaults.font.family = "'Figtree', ui-sans-serif, system-ui, sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#6B7280';
+    Chart.defaults.animation.duration = 900;
+    Chart.defaults.animation.easing = 'easeOutQuart';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(17, 24, 39, 0.92)';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 10;
+    Chart.defaults.plugins.tooltip.titleFont = { weight: '700' };
+    Chart.defaults.plugins.tooltip.titleColor = '#FFFFFF';
+    Chart.defaults.plugins.tooltip.bodyColor = '#E5E7EB';
+    Chart.defaults.plugins.tooltip.borderColor = 'rgba(255, 255, 255, 0.08)';
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
+}
 
 Alpine.start();

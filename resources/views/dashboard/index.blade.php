@@ -6,25 +6,44 @@
     <div class="space-y-6">
 
         <!-- ==================== SECTION 1: FILTER MULTI-KRITERIA (FR-09) ==================== -->
-        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-            <form method="GET" action="{{ route('dashboard') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+        <div class="card p-5" x-reveal>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2.5">
+                    <span class="icon-chip bg-dbl-green-light/60 text-dbl-green-dark">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800">Filter Data Analisis</h3>
+                        <p class="text-[11px] text-gray-400">Persempit cakupan berdasarkan kriteria operasional</p>
+                    </div>
+                </div>
+                @if(request()->hasAny(['start_date', 'end_date', 'province', 'city_regency', 'vendor_id', 'status', 'sla']))
+                    <a href="{{ route('dashboard') }}" class="btn-ghost !px-3 !py-1.5 !text-xs">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reset Filter
+                    </a>
+                @endif
+            </div>
+
+            <form method="GET" action="{{ route('dashboard') }}" x-loading class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Tanggal Mulai (HO)</label>
-                    <input type="date" name="start_date" value="{{ request('start_date') }}"
-                        class="w-full text-sm rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green">
+                    <label class="field-label">Tanggal Mulai (HO)</label>
+                    <input type="date" name="start_date" value="{{ request('start_date') }}" class="field-input">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Tanggal Selesai (HO)</label>
-                    <input type="date" name="end_date" value="{{ request('end_date') }}"
-                        class="w-full text-sm rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green">
+                    <label class="field-label">Tanggal Selesai (HO)</label>
+                    <input type="date" name="end_date" value="{{ request('end_date') }}" class="field-input">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Provinsi</label>
-                    <select name="province" class="w-full text-sm rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green"
-                            onchange="this.form.submit()">
+                    <label class="field-label">Provinsi</label>
+                    <select name="province" class="field-input" onchange="this.form.submit()">
                         <option value="">Semua Provinsi</option>
                         @foreach($provinces as $prov)
                             <option value="{{ $prov }}" {{ request('province') == $prov ? 'selected' : '' }}>{{ $prov }}</option>
@@ -33,8 +52,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Kabupaten/Kota</label>
-                    <select name="city_regency" class="w-full text-sm rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green">
+                    <label class="field-label">Kabupaten/Kota</label>
+                    <select name="city_regency" class="field-input">
                         <option value="">Semua Kota</option>
                         @foreach($cities as $city)
                             <option value="{{ $city }}" {{ request('city_regency') == $city ? 'selected' : '' }}>{{ $city }}</option>
@@ -43,8 +62,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Vendor Last Mile</label>
-                    <select name="vendor_id" class="w-full text-sm rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green">
+                    <label class="field-label">Vendor Last Mile</label>
+                    <select name="vendor_id" class="field-input">
                         <option value="">Semua Vendor</option>
                         @foreach($vendors as $vendor)
                             <option value="{{ $vendor->id }}" {{ request('vendor_id') == $vendor->id ? 'selected' : '' }}>{{ $vendor->name }}</option>
@@ -53,8 +72,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Status Akhir</label>
-                    <select name="status" class="w-full text-sm rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green">
+                    <label class="field-label">Status Akhir</label>
+                    <select name="status" class="field-input">
                         <option value="">Semua Status</option>
                         @foreach($statuses as $statusOption)
                             <option value="{{ $statusOption }}" {{ request('status') == $statusOption ? 'selected' : '' }}>{{ $statusOption }}</option>
@@ -63,23 +82,21 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Kepatuhan SLA</label>
-                    <select name="sla" class="w-full text-sm rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green">
+                    <label class="field-label">Kepatuhan SLA</label>
+                    <select name="sla" class="field-input">
                         <option value="">Semua</option>
                         <option value="within" {{ request('sla') == 'within' ? 'selected' : '' }}>Within SLA</option>
                         <option value="over" {{ request('sla') == 'over' ? 'selected' : '' }}>Over SLA</option>
                     </select>
                 </div>
 
-                <div class="sm:col-span-2 lg:col-span-4 xl:col-span-8 flex items-end justify-end space-x-2">
-                    <button type="submit" class="px-4 py-2 bg-dbl-dark text-white rounded-lg text-sm font-semibold hover:bg-black transition-colors flex items-center">
-                        Filter
+                <div class="sm:col-span-2 lg:col-span-4 xl:col-span-8 flex items-end justify-end gap-2">
+                    <button type="submit" class="btn-primary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Terapkan Filter
                     </button>
-                    @if(request()->hasAny(['start_date', 'end_date', 'province', 'city_regency', 'vendor_id', 'status', 'sla']))
-                        <a href="{{ route('dashboard') }}" class="px-3 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg text-sm font-semibold">
-                            Reset
-                        </a>
-                    @endif
                 </div>
 
             </form>
@@ -87,133 +104,196 @@
 
 
         <!-- ==================== BANNER KESEGARAN DATA ==================== -->
-        <div class="flex flex-wrap items-center gap-3 bg-gradient-to-r from-dbl-dark to-gray-800 text-white px-5 py-3 rounded-2xl shadow-sm">
-            <span class="text-xs font-bold uppercase tracking-wider">Kesegaran Data:</span>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-gradient-to-r from-dbl-dark via-gray-800 to-gray-800 text-white px-5 py-3.5 rounded-2xl shadow-card relative overflow-hidden" x-reveal>
+            <div class="absolute inset-0 bg-gradient-to-r from-dbl-green/10 via-transparent to-transparent pointer-events-none"></div>
+            <div class="flex items-center gap-2.5 relative">
+                <span class="icon-chip !w-8 !h-8 bg-white/10 text-dbl-green">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </span>
+                <span class="text-xs font-bold uppercase tracking-wider text-white/80">Kesegaran Data:</span>
+            </div>
             @if($latestImport)
-                <span class="text-sm font-medium">
+                <span class="text-sm font-medium text-white/90 relative">
                     Import terakhir <span class="text-dbl-green-light font-bold">{{ $latestImport->file_name }}</span>
                     · {{ $latestImport->created_at->format('d M Y, H:i') }} · {{ number_format($latestImport->total_rows) }} baris
                 </span>
             @else
-                <span class="text-sm font-medium">Belum ada import data</span>
+                <span class="text-sm font-medium text-white/90 relative">Belum ada import data</span>
             @endif
-            <span class="hidden md:inline text-white/30">|</span>
-            <span class="text-xs text-white/70">
-                Cakupan: {{ $kpis['totalShipments'] }} resi
+            <span class="hidden md:inline text-white/20">|</span>
+            <span class="text-xs text-white/60 relative">
+                Cakupan: <span class="font-bold text-white">{{ $kpis['totalShipments'] }} resi</span>
                 @if($prevKpis)
-                    (vs {{ number_format($prevKpis['total']) }} resi pada periode sebelumnya)
+                    <span class="text-white/50">(vs {{ number_format($prevKpis['total']) }} resi periode sebelumnya)</span>
                 @endif
             </span>
         </div>
 
 
         <!-- ==================== SECTION 2: KPI CARDS (7 KPI Utama) ==================== -->
+        @php
+            $badge = fn ($value, $invert = false) => $value === null
+                ? ''
+                : '<span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full '.(($value >= 0) xor $invert ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700').'">'.($value >= 0 xor $invert ? '▲' : '▼').' '.abs($value).'%</span>';
+        @endphp
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
 
-            @php
-                $badge = fn ($value, $invert = false) => $value === null
-                    ? ''
-                    : '<span class="inline-flex items-center text-[11px] font-bold px-2 py-0.5 rounded-full mt-1 '.($value >= 0 xor $invert ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50').'">'.($value >= 0 xor $invert ? '▲' : '▼').' '.abs($value).'%</span>';
-            @endphp
-
             <!-- Card 1: Total Pengiriman -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Resi</span>
-                    <span class="p-2 bg-gray-100 rounded-lg text-gray-700">📦</span>
+            <div class="card relative overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5" x-reveal>
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-gray-400/80 to-gray-300"></div>
+                <div class="flex items-center justify-between p-4 pb-0">
+                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Resi</span>
+                    <span class="icon-chip bg-gray-100 text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </span>
                 </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-black text-gray-900">{{ number_format($kpis['totalShipments']) }}</h3>
-                    <p class="text-[11px] text-gray-400 mt-0.5">Total shipment terdaftar</p>
-                    {!! $badge($deltas['total'] ?? null) !!}
+                <div class="p-4 pt-3">
+                    <h3 class="text-3xl font-black text-gray-900 tabular-nums tracking-tight">
+                        <span x-counter data-counter-value="{{ $kpis['totalShipments'] }}">0</span>
+                    </h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-[11px] text-gray-400">Total shipment terdaftar</p>
+                        {!! $badge($deltas['total'] ?? null) !!}
+                    </div>
                 </div>
             </div>
 
             <!-- Card 2: Completed -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Completed</span>
-                    <span class="p-2 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-xs">✓</span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-black text-emerald-600">{{ number_format($kpis['completed']) }}</h3>
-                    <span class="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-1">
-                        {{ $kpis['totalShipments'] > 0 ? round(($kpis['completed'] / $kpis['totalShipments']) * 100, 1) : 0 }}% dari total
+            <div class="card relative overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5" x-reveal x-reveal.delay>
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 to-emerald-300"></div>
+                <div class="flex items-center justify-between p-4 pb-0">
+                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Completed</span>
+                    <span class="icon-chip bg-emerald-100 text-emerald-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </span>
-                    {!! $badge($deltas['completed'] ?? null) !!}
+                </div>
+                <div class="p-4 pt-3">
+                    <h3 class="text-3xl font-black text-emerald-600 tabular-nums tracking-tight">
+                        <span x-counter data-counter-value="{{ $kpis['completed'] }}">0</span>
+                    </h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="inline-flex items-center text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            {{ $kpis['totalShipments'] > 0 ? round(($kpis['completed'] / $kpis['totalShipments']) * 100, 1) : 0 }}% dari total
+                        </span>
+                        {!! $badge($deltas['completed'] ?? null) !!}
+                    </div>
                 </div>
             </div>
 
             <!-- Card 3: On Delivery -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">On Delivery</span>
-                    <span class="p-2 bg-blue-100 text-blue-800 rounded-lg font-bold text-xs">🚚</span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-black text-blue-600">{{ number_format($kpis['onDelivery']) }}</h3>
-                    <span class="inline-flex items-center text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full mt-1">
-                        Dalam proses pengiriman
+            <div class="card relative overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5" x-reveal x-reveal.delay>
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-400 to-blue-300"></div>
+                <div class="flex items-center justify-between p-4 pb-0">
+                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">On Delivery</span>
+                    <span class="icon-chip bg-blue-100 text-blue-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM5 17h14a1 1 0 001-1V8a1 1 0 00-1-1h-3V5a1 1 0 00-1-1H8a1 1 0 00-1 1v2H4a1 1 0 00-1 1v8a1 1 0 001 1z" />
+                        </svg>
                     </span>
-                    {!! $badge($deltas['onDelivery'] ?? null) !!}
+                </div>
+                <div class="p-4 pt-3">
+                    <h3 class="text-3xl font-black text-blue-600 tabular-nums tracking-tight">
+                        <span x-counter data-counter-value="{{ $kpis['onDelivery'] }}">0</span>
+                    </h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-[11px] text-gray-400">Dalam proses pengiriman</p>
+                        {!! $badge($deltas['onDelivery'] ?? null) !!}
+                    </div>
                 </div>
             </div>
 
             <!-- Card 4: Undelivered -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Undelivered</span>
-                    <span class="p-2 bg-rose-100 text-rose-800 rounded-lg font-bold text-xs">⚠️</span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-black text-rose-600">{{ number_format($kpis['undelivered']) }}</h3>
-                    <span class="inline-flex items-center text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full mt-1">
-                        Kendala operasional
+            <div class="card relative overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5" x-reveal x-reveal.delay>
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-rose-400 to-rose-300"></div>
+                <div class="flex items-center justify-between p-4 pb-0">
+                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Undelivered</span>
+                    <span class="icon-chip bg-rose-100 text-rose-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
                     </span>
-                    {!! $badge($deltas['undelivered'] ?? null, true) !!}
+                </div>
+                <div class="p-4 pt-3">
+                    <h3 class="text-3xl font-black text-rose-600 tabular-nums tracking-tight">
+                        <span x-counter data-counter-value="{{ $kpis['undelivered'] }}">0</span>
+                    </h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-[11px] text-gray-400">Kendala operasional</p>
+                        {!! $badge($deltas['undelivered'] ?? null, true) !!}
+                    </div>
                 </div>
             </div>
 
             <!-- Card 5: Within SLA -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Within SLA</span>
-                    <span class="p-2 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-xs">🎯</span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-black text-emerald-600">{{ number_format($kpis['withinSla']) }}</h3>
-                    <span class="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-1">
-                        Tepat waktu
+            <div class="card relative overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5" x-reveal x-reveal.delay>
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-teal-400 to-teal-300"></div>
+                <div class="flex items-center justify-between p-4 pb-0">
+                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Within SLA</span>
+                    <span class="icon-chip bg-teal-100 text-teal-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9a3 3 0 100 6 3 3 0 000-6zm7 1v2m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </span>
-                    {!! $badge($deltas['withinSla'] ?? null) !!}
+                </div>
+                <div class="p-4 pt-3">
+                    <h3 class="text-3xl font-black text-teal-600 tabular-nums tracking-tight">
+                        <span x-counter data-counter-value="{{ $kpis['withinSla'] }}">0</span>
+                    </h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-[11px] text-gray-400">Tepat waktu</p>
+                        {!! $badge($deltas['withinSla'] ?? null) !!}
+                    </div>
                 </div>
             </div>
 
             <!-- Card 6: Over SLA -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Over SLA</span>
-                    <span class="p-2 bg-amber-100 text-amber-800 rounded-lg font-bold text-xs">⏰</span>
+            <div class="card relative overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5" x-reveal x-reveal.delay>
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-amber-300"></div>
+                <div class="flex items-center justify-between p-4 pb-0">
+                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Over SLA</span>
+                    <span class="icon-chip bg-amber-100 text-amber-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
                 </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-black text-amber-600">{{ number_format($kpis['overSla']) }}</h3>
-                    <p class="text-[11px] text-amber-700 font-medium mt-0.5">Melewati batas SLA</p>
-                    {!! $badge($deltas['overSla'] ?? null, true) !!}
+                <div class="p-4 pt-3">
+                    <h3 class="text-3xl font-black text-amber-600 tabular-nums tracking-tight">
+                        <span x-counter data-counter-value="{{ $kpis['overSla'] }}">0</span>
+                    </h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-[11px] text-amber-700 font-medium">Melewati batas SLA</p>
+                        {!! $badge($deltas['overSla'] ?? null, true) !!}
+                    </div>
                 </div>
             </div>
 
             <!-- Card 7: SLA Achievement Rate -->
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between bg-gradient-to-br from-white to-dbl-green-light/30">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">SLA Rate</span>
-                    <span class="p-2 bg-dbl-green text-dbl-dark font-extrabold rounded-lg text-xs">📊</span>
+            <div class="card relative overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5 bg-gradient-to-br from-white via-white to-dbl-green-light/30" x-reveal x-reveal.delay>
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-dbl-green to-dbl-green-light"></div>
+                <div class="flex items-center justify-between p-4 pb-0">
+                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">SLA Rate</span>
+                    <span class="icon-chip bg-dbl-green text-white shadow-glow">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </span>
                 </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-black {{ $kpis['slaAchievementRate'] >= 95 ? 'text-emerald-600' : ($kpis['slaAchievementRate'] >= 85 ? 'text-amber-600' : 'text-rose-600') }}">
-                        {{ $kpis['slaAchievementRate'] }}%
+                <div class="p-4 pt-3">
+                    <h3 class="text-3xl font-black tabular-nums tracking-tight {{ $kpis['slaAchievementRate'] >= 95 ? 'text-emerald-600' : ($kpis['slaAchievementRate'] >= 85 ? 'text-amber-600' : 'text-rose-600') }}">
+                        <span x-counter data-counter-value="{{ $kpis['slaAchievementRate'] }}" data-counter-suffix="%">0</span>
                     </h3>
-                    <p class="text-[11px] text-gray-600 font-medium mt-0.5">Kepatuhan SLA overall</p>
-                    {!! $badge($deltas['slaRate'] ?? null) !!}
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-[11px] text-gray-600 font-medium">Kepatuhan SLA overall</p>
+                        {!! $badge($deltas['slaRate'] ?? null) !!}
+                    </div>
                 </div>
             </div>
 
@@ -224,7 +304,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Chart 1: Komposisi Status Pengiriman -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal>
                 <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
                     <span>Komposisi Status Pengiriman</span>
                     <span class="text-xs text-gray-400 font-normal">Real-time Status</span>
@@ -235,7 +315,7 @@
             </div>
 
             <!-- Chart 2: Performa SLA (Within vs Over) -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal x-reveal.delay>
                 <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
                     <span>Performa Kepatuhan SLA</span>
                     <span class="text-xs text-gray-400 font-normal">Within vs Over SLA</span>
@@ -246,7 +326,7 @@
             </div>
 
             <!-- Chart 3: Tren Pengiriman per Hari (+ SLA Rate) -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal>
                 <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
                     <span>Tren Pengiriman per Hari</span>
                     <span class="text-xs text-gray-400 font-normal">Volume &amp; SLA Rate harian</span>
@@ -257,7 +337,7 @@
             </div>
 
             <!-- Chart 6: Tren Pengiriman per Bulan -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal x-reveal.delay>
                 <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
                     <span>Tren Pengiriman per Bulan</span>
                     <span class="text-xs text-gray-400 font-normal">Agregasi bulanan</span>
@@ -268,7 +348,7 @@
             </div>
 
             <!-- Chart 4: Top 5 Volume per Provinsi -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal>
                 <h4 class="text-base font-bold text-gray-800 mb-4">
                     Distribusi Pengiriman per Provinsi (Top 5)
                 </h4>
@@ -278,7 +358,7 @@
             </div>
 
             <!-- Chart 5: Performa Vendor Last Mile -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal x-reveal.delay>
                 <h4 class="text-base font-bold text-gray-800 mb-4">
                     Top 5 Vendor Last Mile (Volume & Kepatuhan)
                 </h4>
@@ -295,10 +375,10 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Funnel Kepatuhan SLA per Tahap -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal>
                 <div class="flex items-center justify-between mb-1">
                     <h4 class="text-base font-bold text-gray-800">Kepatuhan SLA per Tahap</h4>
-                    <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-1">
+                    <form method="GET" action="{{ route('dashboard') }}" x-loading class="flex items-center gap-1">
                         <input type="hidden" name="start_date" value="{{ request('start_date') }}">
                         <input type="hidden" name="end_date" value="{{ request('end_date') }}">
                         <input type="hidden" name="province" value="{{ request('province') }}">
@@ -306,7 +386,7 @@
                         <input type="hidden" name="vendor_id" value="{{ request('vendor_id') }}">
                         <input type="hidden" name="sla" value="{{ request('sla') }}">
                         <select name="status" onchange="this.form.submit()"
-                                class="text-xs rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green py-1">
+                                class="text-xs rounded-lg border-gray-300 focus:border-dbl-green focus:ring-dbl-green/30 focus:ring-2 py-1.5">
                             <option value="">Semua Status</option>
                             @foreach($statuses as $statusOption)
                                 <option value="{{ $statusOption }}" {{ request('status') == $statusOption ? 'selected' : '' }}>{{ $statusOption }}</option>
@@ -325,19 +405,19 @@
 
                 @foreach($slaStageBreakdown as $stage)
                     @php
-                        $barColor = $stage['rate'] >= $target ? 'bg-emerald-500' : ($stage['rate'] >= 85 ? 'bg-amber-500' : 'bg-rose-500');
+                        $barColor = $stage['rate'] >= $target ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : ($stage['rate'] >= 85 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-rose-500 to-rose-400');
                         $textColor = $stage['rate'] >= $target ? 'text-emerald-600' : ($stage['rate'] >= 85 ? 'text-amber-600' : 'text-rose-600');
                     @endphp
                     <div class="mb-4 last:mb-0">
-                        <div class="flex items-center justify-between text-sm mb-1">
+                        <div class="flex items-center justify-between text-sm mb-1.5">
                             <span class="font-semibold text-gray-700">{{ $stage['label'] }}</span>
                             <span class="text-xs text-gray-400">{{ $stage['within'] }}/{{ $stage['total'] }} resi</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full {{ $barColor }} rounded-full transition-all" style="width: {{ $stage['rate'] }}%"></div>
+                                <div class="h-full {{ $barColor }} rounded-full bar-grow" style="width: {{ $stage['rate'] }}%"></div>
                             </div>
-                            <span class="text-sm font-bold {{ $textColor }} w-14 text-right">{{ $stage['rate'] }}%</span>
+                            <span class="text-sm font-bold {{ $textColor }} w-14 text-right tabular-nums">{{ $stage['rate'] }}%</span>
                         </div>
                     </div>
                 @endforeach
@@ -354,26 +434,29 @@
             </div>
 
             <!-- Rata-rata Lead Time -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal x-reveal.delay>
                 <h4 class="text-base font-bold text-gray-800 mb-4">Rata-rata Lead Time (hari)</h4>
                 <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-gray-50 rounded-xl p-4 text-center">
-                        <div class="text-2xl font-black text-gray-800">{{ $leadTimes['ho_to_pickup'] }}</div>
+                    <div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-100 transition-all duration-300 hover:border-dbl-green/30 hover:shadow-sm">
+                        <div class="text-2xl font-black text-gray-800 tabular-nums">{{ $leadTimes['ho_to_pickup'] }}</div>
                         <div class="text-[11px] text-gray-500 font-semibold mt-1">HO → Pickup</div>
                         <div class="text-[10px] text-gray-400 mt-0.5">Pengambilan barang</div>
                     </div>
-                    <div class="bg-gray-50 rounded-xl p-4 text-center">
-                        <div class="text-2xl font-black text-gray-800">{{ $leadTimes['pickup_to_delivery'] }}</div>
+                    <div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-100 transition-all duration-300 hover:border-dbl-green/30 hover:shadow-sm">
+                        <div class="text-2xl font-black text-gray-800 tabular-nums">{{ $leadTimes['pickup_to_delivery'] }}</div>
                         <div class="text-[11px] text-gray-500 font-semibold mt-1">Pickup → Delivery</div>
                         <div class="text-[10px] text-gray-400 mt-0.5">Proses antar</div>
                     </div>
-                    <div class="bg-gray-50 rounded-xl p-4 text-center">
-                        <div class="text-2xl font-black text-dbl-green-dark">{{ $leadTimes['ho_to_delivery'] }}</div>
+                    <div class="bg-gradient-to-br from-dbl-green-light/60 to-white rounded-xl p-4 text-center border border-dbl-green/20 transition-all duration-300 hover:shadow-md">
+                        <div class="text-2xl font-black text-dbl-green-dark tabular-nums">{{ $leadTimes['ho_to_delivery'] }}</div>
                         <div class="text-[11px] text-gray-500 font-semibold mt-1">HO → Delivery</div>
                         <div class="text-[10px] text-gray-400 mt-0.5">End-to-end</div>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400 mt-4">
+                <p class="text-xs text-gray-400 mt-4 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     Dihitung dari selisih tanggal antar tahapan (hari) pada resi yang memiliki data tahap lengkap.
                 </p>
             </div>
@@ -383,10 +466,10 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Vendor dengan Over-SLA Tertinggi -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal>
                 <h4 class="text-base font-bold text-gray-800 mb-1 flex items-center justify-between">
                     <span>Vendor dengan Over-SLA Tertinggi</span>
-                    <span class="text-xs text-gray-400 font-normal">min. 10 resi</span>
+                    <span class="text-xs bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded-full">min. 10 resi</span>
                 </h4>
                 <p class="text-xs text-gray-400 mb-4">Prioritas perbaikan kualitas vendor last-mile</p>
 
@@ -398,20 +481,21 @@
                             @php
                                 $base = request()->except(['vendor_id', 'page']);
                                 $link = route('shipments.index', array_merge($base, ['vendor_id' => $vendor->vendor_id]));
-                                $barColor = $vendor->rate >= 40 ? 'bg-rose-500' : ($vendor->rate >= 20 ? 'bg-amber-500' : 'bg-emerald-500');
+                                $barColor = $vendor->rate >= 40 ? 'bg-gradient-to-r from-rose-500 to-rose-400' : ($vendor->rate >= 20 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-emerald-500 to-emerald-400');
                             @endphp
                             <a href="{{ $link }}" class="block group">
-                                <div class="flex items-center justify-between text-sm mb-1">
+                                <div class="flex items-center justify-between text-sm mb-1.5">
                                     <span class="font-semibold text-gray-700 group-hover:text-dbl-green-dark transition-colors">
-                                        {{ $index + 1 }}. {{ $vendor->vendor_lm }}
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-gray-100 text-gray-500 text-[10px] font-bold mr-1.5 align-middle">{{ $index + 1 }}</span>
+                                        {{ $vendor->vendor_lm }}
                                     </span>
                                     <span class="text-xs font-bold text-rose-600">{{ $vendor->rate }}% over</span>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                        <div class="h-full {{ $barColor }} rounded-full" style="width: {{ $vendor->rate }}%"></div>
+                                        <div class="h-full {{ $barColor }} rounded-full bar-grow" style="width: {{ $vendor->rate }}%"></div>
                                     </div>
-                                    <span class="text-xs text-gray-400 w-16 text-right">{{ $vendor->over_sla }} / {{ $vendor->total }} resi</span>
+                                    <span class="text-xs text-gray-400 w-16 text-right tabular-nums">{{ $vendor->over_sla }} / {{ $vendor->total }} resi</span>
                                 </div>
                             </a>
                         @endforeach
@@ -420,12 +504,12 @@
             </div>
 
             <!-- Provinsi & Kota dengan Undelivered Terbanyak -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal x-reveal.delay>
                 <h4 class="text-base font-bold text-gray-800 mb-4">Undelivered per Wilayah (Top 5)</h4>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Provinsi</p>
+                        <p class="field-label mb-2">Provinsi</p>
                         @if($worstRegions['provinces']->isEmpty())
                             <p class="text-xs text-gray-400 py-3">Tidak ada data</p>
                         @else
@@ -435,16 +519,18 @@
                                         $base = request()->except(['province', 'page']);
                                         $link = route('shipments.index', array_merge($base, ['province' => $row->province]));
                                     @endphp
-                                    <a href="{{ $link }}" class="flex items-center justify-between text-sm bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 transition-colors">
+                                    <a href="{{ $link }}" class="flex items-center justify-between text-sm bg-gray-50 hover:bg-dbl-green-light/40 hover:border-dbl-green/20 border border-transparent rounded-lg px-3 py-2 transition-all">
                                         <span class="font-medium text-gray-700 truncate">{{ $row->province }}</span>
-                                        <span class="text-xs font-bold text-rose-600 shrink-0">{{ $row->undelivered }} resi</span>
+                                        <span class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 shrink-0">
+                                            <span class="dot bg-rose-500"></span>{{ $row->undelivered }} resi
+                                        </span>
                                     </a>
                                 @endforeach
                             </div>
                         @endif
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kabupaten/Kota</p>
+                        <p class="field-label mb-2">Kabupaten/Kota</p>
                         @if($worstRegions['cities']->isEmpty())
                             <p class="text-xs text-gray-400 py-3">Tidak ada data</p>
                         @else
@@ -454,9 +540,11 @@
                                         $base = request()->except(['city_regency', 'page']);
                                         $link = route('shipments.index', array_merge($base, ['city_regency' => $row->city_regency]));
                                     @endphp
-                                    <a href="{{ $link }}" class="flex items-center justify-between text-sm bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 transition-colors">
+                                    <a href="{{ $link }}" class="flex items-center justify-between text-sm bg-gray-50 hover:bg-dbl-green-light/40 hover:border-dbl-green/20 border border-transparent rounded-lg px-3 py-2 transition-all">
                                         <span class="font-medium text-gray-700 truncate">{{ $row->city_regency }}</span>
-                                        <span class="text-xs font-bold text-rose-600 shrink-0">{{ $row->undelivered }} resi</span>
+                                        <span class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 shrink-0">
+                                            <span class="dot bg-rose-500"></span>{{ $row->undelivered }} resi
+                                        </span>
                                     </a>
                                 @endforeach
                             </div>
@@ -470,25 +558,40 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Open Issues -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal>
                 <h4 class="text-base font-bold text-gray-800 mb-1 flex items-center justify-between">
                     <span>Issue Terbuka</span>
-                    <span class="text-xs bg-rose-50 text-rose-700 font-bold px-2 py-0.5 rounded-full">{{ $issuesTotal }} open</span>
+                    <span class="badge bg-rose-50 text-rose-700">
+                        <span class="dot bg-rose-500"></span>{{ $issuesTotal }} open
+                    </span>
                 </h4>
                 <p class="text-xs text-gray-400 mb-4">Issue aktif pada scope filter saat ini</p>
 
                 @if($openIssues->isEmpty())
-                    <p class="text-sm text-gray-400 py-6 text-center">Tidak ada issue terbuka 🎉</p>
+                    <div class="flex flex-col items-center justify-center py-8 text-center">
+                        <div class="icon-chip bg-emerald-50 text-emerald-500 mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-sm text-gray-400 font-medium">Tidak ada issue terbuka</p>
+                    </div>
                 @else
-                    <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+                    <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto pr-1 -mr-1">
                         @foreach($openIssues as $issue)
-                            <div class="py-3">
+                            <div class="py-3.5 group">
                                 <div class="flex items-center justify-between gap-2">
-                                    <span class="text-sm font-semibold text-gray-800">{{ $issue->waybill_no }}</span>
-                                    <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full shrink-0">{{ $issue->issue_type }}</span>
+                                    <span class="text-sm font-bold text-gray-800 font-mono">{{ $issue->waybill_no }}</span>
+                                    <span class="badge bg-rose-50 text-rose-700 shrink-0">
+                                        <span class="dot bg-rose-500"></span>{{ $issue->issue_type }}
+                                    </span>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-0.5">{{ $issue->description }}</p>
-                                <p class="text-[11px] text-gray-400 mt-1">
+                                <p class="text-xs text-gray-500 mt-1">{{ $issue->description }}</p>
+                                <p class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
                                     {{ $issue->province }}{{ $issue->city_regency ? ' · '.$issue->city_regency : '' }}
                                     · {{ $issue->reported_at?->format('d M Y H:i') }}
                                 </p>
@@ -499,52 +602,62 @@
             </div>
 
             <!-- Dispatch Terbaru (DR-05) -->
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="card p-5" x-reveal x-reveal.delay>
                 <div class="flex items-center justify-between mb-4">
                     <h4 class="text-base font-bold text-gray-800">Dispatch Terbaru</h4>
                     <a href="{{ route('shipments.index', request()->query()) }}"
-                       class="text-xs font-semibold text-dbl-green-dark hover:underline">
-                        Lihat Semua →
+                       class="inline-flex items-center gap-1 text-xs font-semibold text-dbl-green-dark hover:text-dbl-green transition-colors">
+                        Lihat Semua
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
                     </a>
                 </div>
 
                 @php
                     $statusColor = [
-                        'Completed' => 'bg-emerald-100 text-emerald-700',
-                        'On Delivery' => 'bg-blue-100 text-blue-700',
-                        'Undelivered' => 'bg-rose-100 text-rose-700',
+                        'Completed' => 'bg-emerald-50 text-emerald-700',
+                        'On Delivery' => 'bg-blue-50 text-blue-700',
+                        'Undelivered' => 'bg-rose-50 text-rose-700',
+                    ];
+                    $statusDot = [
+                        'Completed' => 'bg-emerald-500',
+                        'On Delivery' => 'bg-blue-500',
+                        'Undelivered' => 'bg-rose-500',
                     ];
                 @endphp
 
                 @if($recentShipments->isEmpty())
                     <p class="text-sm text-gray-400 py-6 text-center">Belum ada pengiriman pada filter ini</p>
                 @else
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto -mx-5 px-5">
                         <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="text-left text-[11px] text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                                    <th class="py-2 pr-2 font-semibold">Resi</th>
-                                    <th class="py-2 pr-2 font-semibold">Tanggal HO</th>
-                                    <th class="py-2 pr-2 font-semibold">Wilayah</th>
-                                    <th class="py-2 pr-2 font-semibold">Vendor</th>
-                                    <th class="py-2 pr-2 font-semibold">Status</th>
-                                    <th class="py-2 font-semibold">SLA</th>
+                                    <th class="py-2.5 pr-2 font-bold">Resi</th>
+                                    <th class="py-2.5 pr-2 font-bold">Tanggal HO</th>
+                                    <th class="py-2.5 pr-2 font-bold">Wilayah</th>
+                                    <th class="py-2.5 pr-2 font-bold">Vendor</th>
+                                    <th class="py-2.5 pr-2 font-bold">Status</th>
+                                    <th class="py-2.5 font-bold">SLA</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
                                 @foreach($recentShipments as $shipment)
-                                    <tr>
-                                        <td class="py-2.5 pr-2 font-mono text-xs text-gray-700">{{ $shipment->waybill_no }}</td>
-                                        <td class="py-2.5 pr-2 text-xs text-gray-500">{{ $shipment->ho_date?->format('d M Y') }}</td>
-                                        <td class="py-2.5 pr-2 text-xs text-gray-500">{{ $shipment->city_regency ?? $shipment->province }}</td>
-                                        <td class="py-2.5 pr-2 text-xs text-gray-500">{{ $shipment->vendor_lm ?? '—' }}</td>
-                                        <td class="py-2.5 pr-2">
-                                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full {{ $statusColor[$shipment->final_status] ?? 'bg-gray-100 text-gray-600' }}">
+                                    <tr class="transition-colors hover:bg-dbl-green-light/20">
+                                        <td class="py-3 pr-2 font-mono text-xs font-semibold text-gray-800">{{ $shipment->waybill_no }}</td>
+                                        <td class="py-3 pr-2 text-xs text-gray-500">{{ $shipment->ho_date?->format('d M Y') }}</td>
+                                        <td class="py-3 pr-2 text-xs text-gray-500">{{ $shipment->city_regency ?? $shipment->province }}</td>
+                                        <td class="py-3 pr-2 text-xs text-gray-500">{{ $shipment->vendor_lm ?? '—' }}</td>
+                                        <td class="py-3 pr-2">
+                                            <span class="badge {{ $statusColor[$shipment->final_status] ?? 'bg-gray-100 text-gray-600' }}">
+                                                <span class="dot {{ $statusDot[$shipment->final_status] ?? 'bg-gray-400' }}"></span>
                                                 {{ $shipment->final_status ?? '—' }}
                                             </span>
                                         </td>
-                                        <td class="py-2.5">
-                                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full {{ $shipment->is_within_sla ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600' }}">
+                                        <td class="py-3">
+                                            <span class="badge {{ $shipment->is_within_sla ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600' }}">
+                                                <span class="dot {{ $shipment->is_within_sla ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                                                 {{ $shipment->is_within_sla ? 'Within' : 'Over' }}
                                             </span>
                                         </td>
@@ -564,6 +677,37 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
+            // Plugin: teks tengah untuk doughnut chart
+            const doughnutCenter = {
+                id: 'doughnutCenter',
+                afterDraw(chart) {
+                    const { ctx } = chart;
+                    const meta = chart.getDatasetMeta(0);
+                    if (!meta || !meta.total) return;
+
+                    const isSla = chart.canvas.id === 'slaChart';
+                    const data = chart.data.datasets[0].data;
+                    const total = data.reduce((a, b) => a + b, 0);
+                    const primary = isSla ? data[0] : total;
+                    const pct = total > 0 ? Math.round((primary / total) * 100) : 0;
+
+                    const x = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+                    const y = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = '800 26px Figtree, ui-sans-serif, sans-serif';
+                    ctx.fillStyle = isSla ? '#059669' : '#111827';
+                    ctx.fillText(pct + '%', x, y - 8);
+                    ctx.font = '600 10px Figtree, ui-sans-serif, sans-serif';
+                    ctx.fillStyle = '#9CA3AF';
+                    ctx.fillText(isSla ? 'On Time' : 'Total Resi', x, y + 14);
+                    ctx.restore();
+                }
+            };
+            Chart.register(doughnutCenter);
+
             // 1. Donut Chart - Status Pengiriman
             new Chart(document.getElementById('statusChart'), {
                 type: 'doughnut',
@@ -576,14 +720,36 @@
                             {{ $statusChart['Undelivered'] }}
                         ],
                         backgroundColor: ['#10B981', '#3B82F6', '#EF4444'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 10
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                padding: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : 0;
+                                    return ` ${ctx.label}: ${ctx.raw.toLocaleString('id-ID')} resi (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
 
@@ -598,14 +764,36 @@
                             {{ $slaChart['Over SLA'] }}
                         ],
                         backgroundColor: ['#059669', '#F59E0B'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 10
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                padding: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : 0;
+                                    return ` ${ctx.label}: ${ctx.raw.toLocaleString('id-ID')} resi (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
 
@@ -625,10 +813,22 @@
                             label: 'Jumlah Pengiriman',
                             data: trendTotalsArr,
                             borderColor: '#059669',
-                            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                            backgroundColor: (context) => {
+                                const { ctx, chartArea } = context.chart;
+                                if (!chartArea) return 'rgba(16, 185, 129, 0.15)';
+                                const g = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                                g.addColorStop(0, 'rgba(16, 185, 129, 0.02)');
+                                g.addColorStop(1, 'rgba(16, 185, 129, 0.25)');
+                                return g;
+                            },
                             fill: true,
-                            tension: 0.3,
+                            tension: 0.35,
+                            borderWidth: 2.5,
                             pointRadius: 3,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#059669',
+                            pointBorderWidth: 2,
+                            hoverPointRadius: 5,
                             yAxisID: 'y'
                         },
                         {
@@ -636,9 +836,11 @@
                             data: trendTotalsArr.map((t, i) => t > 0 ? Math.round((trendWithinArr[i] / t) * 1000) / 10 : 0),
                             borderColor: '#111827',
                             backgroundColor: 'transparent',
-                            borderDash: [5, 5],
-                            tension: 0.3,
+                            borderDash: [6, 4],
+                            borderWidth: 1.5,
+                            tension: 0.35,
                             pointRadius: 2,
+                            pointBackgroundColor: '#111827',
                             yAxisID: 'y1'
                         }
                     ]
@@ -647,10 +849,32 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { position: 'bottom' } },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                padding: 16
+                            }
+                        }
+                    },
                     scales: {
-                        y: { beginAtZero: true, ticks: { precision: 0 } },
-                        y1: { beginAtZero: true, max: 100, position: 'right', ticks: { callback: v => v + '%' }, grid: { drawOnChartArea: false } }
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, maxTicksLimit: 6 },
+                            grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            max: 100,
+                            position: 'right',
+                            ticks: { callback: v => v + '%', maxTicksLimit: 5 },
+                            grid: { drawOnChartArea: false }
+                        },
+                        x: { grid: { display: false } }
                     }
                 }
             });
@@ -663,15 +887,35 @@
                     datasets: [{
                         label: 'Total Pengiriman',
                         data: {!! json_encode($trendMonthly->pluck('total')) !!},
-                        backgroundColor: 'rgba(17, 24, 39, 0.75)',
-                        borderRadius: 6
+                        backgroundColor: (context) => {
+                            const { ctx, chartArea } = context.chart;
+                            if (!chartArea) return 'rgba(5, 150, 105, 0.8)';
+                            const g = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                            g.addColorStop(0, 'rgba(16, 185, 129, 0.55)');
+                            g.addColorStop(1, 'rgba(5, 150, 105, 0.95)');
+                            return g;
+                        },
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        maxBarThickness: 42,
+                        hoverBackgroundColor: '#047857'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw.toLocaleString('id-ID')} resi` } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, maxTicksLimit: 6 },
+                            grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
                 }
             });
 
@@ -683,15 +927,39 @@
                     datasets: [{
                         label: 'Total Pengiriman',
                         data: {!! json_encode($provinceData->pluck('total')) !!},
-                        backgroundColor: '#111827',
-                        borderRadius: 6
+                        backgroundColor: (context) => {
+                            const { ctx, chartArea } = context.chart;
+                            if (!chartArea) return 'rgba(17, 24, 39, 0.8)';
+                            const g = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                            g.addColorStop(0, 'rgba(17, 24, 39, 0.35)');
+                            g.addColorStop(1, 'rgba(17, 24, 39, 0.85)');
+                            return g;
+                        },
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        maxBarThickness: 42,
+                        hoverBackgroundColor: '#059669'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.raw.toLocaleString('id-ID')} resi`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, maxTicksLimit: 6 },
+                            grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
                 }
             });
 
@@ -704,22 +972,44 @@
                         {
                             label: 'Total Volume',
                             data: {!! json_encode($vendorData->pluck('total')) !!},
-                            backgroundColor: '#374151',
-                            borderRadius: 4
+                            backgroundColor: 'rgba(55, 65, 81, 0.8)',
+                            borderRadius: 5,
+                            maxBarThickness: 26,
+                            hoverBackgroundColor: '#374151'
                         },
                         {
                             label: 'Within SLA',
                             data: {!! json_encode($vendorData->pluck('on_time')) !!},
-                            backgroundColor: '#10B981',
-                            borderRadius: 4
+                            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                            borderRadius: 5,
+                            maxBarThickness: 26,
+                            hoverBackgroundColor: '#059669'
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 8,
+                                boxHeight: 8,
+                                padding: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, maxTicksLimit: 6 },
+                            grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
                 }
             });
 

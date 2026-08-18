@@ -42,10 +42,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect(
-            $request->input('website_logout')
-                ? route('website.login', absolute: false)
-                : '/'
-        );
+        return redirect('/');
     }
 }

@@ -2,14 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Font website ANL — scoped hanya untuk halaman publik website (dashboard tetap Figtree) */
-.site-root {
-    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-
 /* Sembunyikan elemen Alpine sebelum diinisialisasi (hindari flicker) */
 [x-cloak] {
     display: none !important;
+}
+
+/* ============================================================
+   KOMPONEN UTILITAS
+   ============================================================ */
+@layer components {
+    /* Kartu dasar yang konsisten di seluruh halaman */
+    .card {
+        @apply bg-white border border-gray-200 rounded-2xl shadow-card;
+    }
+
+    /* Kartu dengan efek hover (lift) */
+    .card-interactive {
+        @apply card transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5 hover:border-gray-300;
+    }
+
+    /* Chip ikon SVG dengan tint warna */
+    .icon-chip {
+        @apply inline-flex items-center justify-center w-9 h-9 rounded-xl shrink-0;
+    }
+
+    /* Badge status dasar */
+    .badge {
+        @apply inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap;
+    }
+
+    /* Dot indikator status */
+    .dot {
+        @apply inline-block w-1.5 h-1.5 rounded-full;
+    }
+
+    /* Input & select yang seragam */
+    .field-input {
+        @apply w-full text-sm rounded-lg border-gray-300 bg-white text-gray-800 shadow-sm focus:border-dbl-green focus:ring-dbl-green/30 focus:ring-2 transition-shadow;
+    }
+
+    /* Label field */
+    .field-label {
+        @apply block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5;
+    }
+
+    /* Tombol primer hijau */
+    .btn-primary {
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-br from-dbl-green to-dbl-green-dark text-white text-sm font-bold rounded-lg shadow-md shadow-dbl-green/20 transition-all duration-200 hover:shadow-glow hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+    }
+
+    /* Tombol sekunder (outline/ghost) */
+    .btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-600 text-sm font-bold rounded-lg border border-gray-200 transition-all duration-200 hover:bg-gray-50 hover:text-gray-800 hover:border-gray-300 active:scale-[0.98];
+    }
+
+    /* Tombol danger */
+    .btn-danger {
+        @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-br from-rose-500 to-rose-600 text-white text-sm font-bold rounded-lg shadow-md shadow-rose-500/20 transition-all duration-200 hover:shadow-lg hover:brightness-105 active:scale-[0.98];
+    }
+}
+
+/* ============================================================
+   ANIMASI HALAMAN & ELEMEN
+   ============================================================ */
+
+/* Animasi masuk halaman utama (app layout) */
+.page-enter {
+    animation: x-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Animasi scroll-reveal (direktif x-reveal) */
@@ -40,9 +99,42 @@
     }
 }
 
-.x-animate-fade-up {
-    opacity: 0;
-    animation: x-fade-up 0.8s ease forwards;
+/* Animasi bar progress saat dimuat */
+.bar-grow {
+    transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ============================================================
+   SCROLLBAR & DETAIL
+   ============================================================ */
+
+/* Scrollbar tipis untuk area konten */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(209 213 219) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: rgb(209 213 219);
+    border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: rgb(156 163 175);
+}
+
+/* Tooltip Chart.js yang halus */
+.chart-tooltip {
+    @apply font-sans text-xs font-semibold text-gray-800 bg-white/95 backdrop-blur border border-gray-200 rounded-xl shadow-lift px-3 py-2;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -52,8 +144,11 @@
         transition: none;
     }
 
-    .x-animate-fade-up {
-        opacity: 1;
+    .page-enter {
         animation: none;
+    }
+
+    .bar-grow {
+        transition: none;
     }
 }

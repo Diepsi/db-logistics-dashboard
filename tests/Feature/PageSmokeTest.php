@@ -25,48 +25,6 @@ class PageSmokeTest extends TestCase
         $this->get('/reports')->assertRedirect(route('login'));
     }
 
-    public function test_public_website_pages_are_accessible_to_guest(): void
-    {
-        $this->get('/')->assertOk()->assertSee('Amanah Nusantara Logistik');
-        $this->get('/tentang')->assertOk();
-        $this->get('/layanan')->assertOk();
-        $this->get('/kontak')->assertOk();
-    }
-
-    public function test_public_website_does_not_expose_dashboard_access(): void
-    {
-        $this->get('/')->assertDontSee('Masuk Dashboard')->assertDontSee('Buka Dashboard');
-        $this->get('/tentang')->assertDontSee('Masuk Dashboard')->assertDontSee('Buka Dashboard');
-        $this->get('/layanan')->assertDontSee('Masuk Dashboard')->assertDontSee('Buka Dashboard');
-        $this->get('/kontak')->assertDontSee('Masuk Dashboard')->assertDontSee('Buka Dashboard');
-    }
-
-    public function test_contact_form_can_be_submitted(): void
-    {
-        $this->post('/kontak', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'message' => 'Ini pesan uji coba',
-        ])->assertRedirect()->assertSessionHas('message');
-    }
-
-    public function test_contact_form_can_be_submitted_via_json(): void
-    {
-        $this->postJson('/kontak', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'phone' => '081362323510',
-            'message' => 'Ini pesan uji coba',
-        ])->assertOk()->assertJsonPath('message', 'Terima kasih! Pesan Anda telah kami terima dan akan segera kami balas.');
-    }
-
-    public function test_contact_form_returns_json_validation_errors(): void
-    {
-        $this->postJson('/kontak', [])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['name', 'email', 'message']);
-    }
-
     public function test_admin_can_access_all_pages(): void
     {
         $admin = $this->createUserWithRole('admin');
