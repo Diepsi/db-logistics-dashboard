@@ -26,22 +26,22 @@ class ExcelStreamReader
      *
      * @return Generator<string, array<string, mixed>>
      */
-    public static function rows(string $path, array &$headers, ?string $extension = null, ?int $maxRows = null, ?string $sheetName = null): Generator
+    public static function rows(string $path, array &$headers, ?string $extension = null, ?int $maxRows = null, string|array|null $sheetName = null, ?callable $keyResolver = null): Generator
     {
         $ext = $extension !== null
             ? strtolower($extension)
             : strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
         if ($ext === 'xlsx') {
-            yield from self::readXlsx($path, $headers, $maxRows, $sheetName);
+            yield from self::readXlsx($path, $headers, $maxRows, $sheetName, $keyResolver);
 
             return;
         }
 
-        yield from self::readSpreadsheet($path, $headers, $ext, $maxRows, $sheetName);
+        yield from self::readSpreadsheet($path, $headers, $ext, $maxRows, $sheetName, $keyResolver);
     }
 
-    private static function readXlsx(string $path, array &$headers, ?int $maxRows, ?string $sheetName): Generator
+    private static function readXlsx(string $path, array &$headers, ?int $maxRows, string|array|null $sheetName, ?callable $keyResolver): Generator
     {
         $zip = new ZipArchive;
 
@@ -49,9 +49,24 @@ class ExcelStreamReader
             throw new \RuntimeException('File Excel tidak valid (bukan file xlsx yang benar).');
         }
 
-        $sheetEntry = $sheetName !== null
-            ? self::sheetEntryByName($zip, $sheetName)
-            : self::firstSheetEntry($zip);
+        $sheetEntry = null;
+        $triedNames = [];
+
+        if ($sheetName !== null) {
+            $candidates = is_array($sheetName) ? $sheetName : [$sheetName];
+
+            foreach ($candidates as $candidate) {
+                $triedNames[] = $candidate;
+                $entry = self::sheetEntryByName($zip, $candidate);
+
+                if ($entry !== null) {
+                    $sheetEntry = $entry;
+                    break;
+                }
+            }
+        } else {
+            $sheetEntry = self::firstSheetEntry($zip);
+        }
 
         if ($sheetName !== null && $sheetEntry === null) {
             $zip->close();
@@ -137,7 +152,9 @@ class ExcelStreamReader
 
                         if ($raw !== '') {
                             $headers[$col] = $raw;
-                            $headerKeys[$col] = ShipmentRowNormalizer::canonicalKey($raw);
+                            $headerKeys[$col] = $keyResolver
+                                ? $keyResolver($raw)
+                                : strtolower(preg_replace('/[^a-z0-9]+/', '_', mb_strtolower($raw)));
                         }
                     }
 
@@ -287,14 +304,17 @@ class ExcelStreamReader
         return null;
     }
 
-    private static function sheetNotFound(string $sheetName): SheetNotFoundException
+    private static function sheetNotFound(string|array $sheetName): SheetNotFoundException
     {
+        $names = is_array($sheetName) ? $sheetName : [$sheetName];
+        $quoted = implode(' atau ', array_map(fn ($n) => "'{$n}'", $names));
+
         return new SheetNotFoundException(
-            sprintf("Sheet '%s' tidak ditemukan pada file Excel yang diunggah.", $sheetName)
+            sprintf("Sheet %s tidak ditemukan pada file Excel yang diunggah.", $quoted)
         );
     }
 
-    private static function readSpreadsheet(string $path, array &$headers, string $ext, ?int $maxRows, ?string $sheetName): Generator
+    private static function readSpreadsheet(string $path, array &$headers, string $ext, ?int $maxRows, string|array|null $sheetName, ?callable $keyResolver): Generator
     {
         $reader = match ($ext) {
             'xls' => new Xls,
@@ -322,12 +342,15 @@ class ExcelStreamReader
         $spreadsheet = $reader->load($path);
 
         if ($sheetName !== null) {
+            $candidates = is_array($sheetName) ? $sheetName : [$sheetName];
             $sheet = null;
 
-            foreach ($spreadsheet->getAllSheets() as $candidate) {
-                if (strcasecmp(trim($candidate->getTitle()), trim($sheetName)) === 0) {
-                    $sheet = $candidate;
-                    break;
+            foreach ($candidates as $candidate) {
+                foreach ($spreadsheet->getAllSheets() as $worksheet) {
+                    if (strcasecmp(trim($worksheet->getTitle()), trim($candidate)) === 0) {
+                        $sheet = $worksheet;
+                        break 2;
+                    }
                 }
             }
 
@@ -364,7 +387,9 @@ class ExcelStreamReader
 
                 if ($raw !== '') {
                     $headers[$letter] = $raw;
-                    $headerKeys[$letter] = ShipmentRowNormalizer::canonicalKey($raw);
+                    $headerKeys[$letter] = $keyResolver
+                        ? $keyResolver($raw)
+                        : strtolower(preg_replace('/[^a-z0-9]+/', '_', mb_strtolower($raw)));
                 }
 
                 continue;

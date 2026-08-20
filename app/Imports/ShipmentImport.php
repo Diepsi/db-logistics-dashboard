@@ -81,7 +81,7 @@ class ShipmentImport implements ToCollection, WithChunkReading, WithHeadingRow, 
             }
             $this->seenWaybills[$waybill] = true;
 
-            $vendorName = trim((string) ($row['vendor_lm'] ?? '')) ?: 'Vendor Lainnya';
+            $vendorName = trim((string) ($row['vendor_lm'] ?? $row['vendor_mm'] ?? '')) ?: 'Vendor Lainnya';
             $vendorId = $this->vendorCache[$vendorName]
                 ??= Vendor::firstOrCreate(['name' => $vendorName])->id;
 

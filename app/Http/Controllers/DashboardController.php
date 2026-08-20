@@ -120,6 +120,25 @@ class DashboardController extends Controller
             ->get(['id', 'waybill_no', 'ho_date', 'province', 'city_regency', 'vendor_lm', 'final_status', 'is_within_sla']);
 
         // ----------------------------------------------------
+        // 3b. ANALYTICS BARU — BAST/Finance, SLA MM vs LM, Vendor MM, Inbound FM, Status Detail
+        // ----------------------------------------------------
+
+        // BAST & Finance pipeline breakdown
+        $bastFinance = $service->bastFinanceBreakdown();
+
+        // SLA MM vs LM comparison per vendor
+        $slaMmVsLm = $service->slaMmVsLmComparison();
+
+        // Vendor MM performance
+        $vendorMmPerformance = $service->vendorMmPerformance();
+
+        // Inbound First Mile status distribution
+        $inboundFmMetrics = $service->inboundFirstMileMetrics();
+
+        // Status Akhir detail distribution
+        $statusAkhirDistribution = $service->statusAkhirDistribution($query);
+
+        // ----------------------------------------------------
         // 4. DATA DROPDOWN FILTER
         // ----------------------------------------------------
         $filterOptions = $service->filterOptions($request);
@@ -143,6 +162,11 @@ class DashboardController extends Controller
             'issuesTotal',
             'latestImport',
             'recentShipments',
+            'bastFinance',
+            'slaMmVsLm',
+            'vendorMmPerformance',
+            'inboundFmMetrics',
+            'statusAkhirDistribution',
             'provinces',
             'cities',
             'vendors',

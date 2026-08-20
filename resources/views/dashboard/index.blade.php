@@ -370,6 +370,78 @@
         </div>
 
 
+        <!-- ==================== SECTION 3b: ANALYTICS LANJUTAN ==================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Chart 7: BAST Pipeline Donut -->
+            <div class="card p-5" x-reveal>
+                <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
+                    <span>Status BAST</span>
+                    <span class="text-xs text-gray-400 font-normal">{{ number_format($bastFinance['bastTotal']) }} resi</span>
+                </h4>
+                <div class="h-56 flex justify-center items-center">
+                    <canvas id="bastChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 8: Finance Pipeline Donut -->
+            <div class="card p-5" x-reveal x-reveal.delay>
+                <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
+                    <span>Status Keuangan</span>
+                    <span class="text-xs text-gray-400 font-normal">{{ number_format($bastFinance['financeTotal']) }} resi</span>
+                </h4>
+                <div class="h-56 flex justify-center items-center">
+                    <canvas id="financeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 9: SLA MM vs LM Comparison -->
+            <div class="card p-5" x-reveal>
+                <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
+                    <span>SLA Middle Mile vs Last Mile</span>
+                    <span class="text-xs text-gray-400 font-normal">Per Vendor (Top 10)</span>
+                </h4>
+                <div class="h-72">
+                    <canvas id="slaMmVsLmChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 10: Vendor MM Performance -->
+            <div class="card p-5" x-reveal x-reveal.delay>
+                <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
+                    <span>Performa Vendor Middle Mile</span>
+                    <span class="text-xs text-gray-400 font-normal">Volume & SLA Rate</span>
+                </h4>
+                <div class="h-72">
+                    <canvas id="vendorMmChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 11: Inbound First Mile Donut -->
+            <div class="card p-5" x-reveal>
+                <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
+                    <span>Status Inbound First Mile</span>
+                    <span class="text-xs text-gray-400 font-normal">Dari FM ke Gudang</span>
+                </h4>
+                <div class="h-56 flex justify-center items-center">
+                    <canvas id="inboundFmChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 12: Status Akhir Detail -->
+            <div class="card p-5" x-reveal x-reveal.delay>
+                <h4 class="text-base font-bold text-gray-800 mb-4 flex items-center justify-between">
+                    <span>Distribusi Status Akhir</span>
+                    <span class="text-xs text-gray-400 font-normal">Breakdown detail</span>
+                </h4>
+                <div class="h-56">
+                    <canvas id="statusAkhirChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+
         <!-- ==================== SECTION 4: PANEL ANALISIS ==================== -->
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1012,6 +1084,172 @@
                     }
                 }
             });
+
+            // 7. Donut Chart - Status BAST
+            const bastLabels = {!! json_encode($bastFinance['bastData']->pluck('bast_status')) !!};
+            const bastTotals = {!! json_encode($bastFinance['bastData']->pluck('total')) !!};
+            const bastColors = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+            if (bastLabels.length > 0) {
+                new Chart(document.getElementById('bastChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: bastLabels,
+                        datasets: [{ data: bastTotals, backgroundColor: bastColors.slice(0, bastLabels.length), borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '62%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, padding: 12 } },
+                            tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString('id-ID')} resi` } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('bastChart').parentElement.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">Belum ada data BAST</p>';
+            }
+
+            // 8. Donut Chart - Status Keuangan
+            const financeLabels = {!! json_encode($bastFinance['financeData']->pluck('finance_status')) !!};
+            const financeTotals = {!! json_encode($bastFinance['financeData']->pluck('total')) !!};
+            const financeColors = ['#8B5CF6', '#0EA5E9', '#22C55E', '#EAB308', '#F97316', '#EF4444', '#EC4899'];
+            if (financeLabels.length > 0) {
+                new Chart(document.getElementById('financeChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: financeLabels,
+                        datasets: [{ data: financeTotals, backgroundColor: financeColors.slice(0, financeLabels.length), borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '62%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, padding: 12 } },
+                            tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString('id-ID')} resi` } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('financeChart').parentElement.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">Belum ada data keuangan</p>';
+            }
+
+            // 9. Grouped Bar - SLA MM vs LM per Vendor
+            const slaMmLmLabels = {!! json_encode($slaMmVsLm->pluck('vendor')) !!};
+            const slaMmLmMmRates = {!! json_encode($slaMmVsLm->pluck('mm_rate')) !!};
+            const slaMmLmLmRates = {!! json_encode($slaMmVsLm->pluck('lm_rate')) !!};
+            if (slaMmLmLabels.length > 0) {
+                new Chart(document.getElementById('slaMmVsLmChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: slaMmLmLabels,
+                        datasets: [
+                            { label: 'SLA MM (%)', data: slaMmLmMmRates, backgroundColor: 'rgba(99, 102, 241, 0.8)', borderRadius: 5, maxBarThickness: 22, hoverBackgroundColor: '#4F46E5' },
+                            { label: 'SLA LM (%)', data: slaMmLmLmRates, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 5, maxBarThickness: 22, hoverBackgroundColor: '#059669' }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, padding: 16 } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', maxTicksLimit: 6 }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                            x: { grid: { display: false }, ticks: { maxRotation: 45 } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('slaMmVsLmChart').parentElement.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">Belum ada data SLA MM/LM</p>';
+            }
+
+            // 10. Grouped Bar - Vendor MM Performance
+            const vmmLabels = {!! json_encode($vendorMmPerformance->pluck('vendor')) !!};
+            const vmmTotals = {!! json_encode($vendorMmPerformance->pluck('total')) !!};
+            const vmmRates = {!! json_encode($vendorMmPerformance->pluck('rate')) !!};
+            if (vmmLabels.length > 0) {
+                new Chart(document.getElementById('vendorMmChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: vmmLabels,
+                        datasets: [
+                            { label: 'Volume', data: vmmTotals, backgroundColor: 'rgba(55, 65, 81, 0.8)', borderRadius: 5, maxBarThickness: 22, hoverBackgroundColor: '#374151', yAxisID: 'y' },
+                            { label: 'SLA Rate (%)', data: vmmRates, backgroundColor: 'rgba(99, 102, 241, 0.8)', borderRadius: 5, maxBarThickness: 22, hoverBackgroundColor: '#4F46E5', yAxisID: 'y1' }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, padding: 16 } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { precision: 0, maxTicksLimit: 6 }, grid: { color: 'rgba(0,0,0,0.04)' }, title: { display: true, text: 'Volume', font: { size: 10 } } },
+                            y1: { beginAtZero: true, max: 100, position: 'right', ticks: { callback: v => v + '%', maxTicksLimit: 5 }, grid: { drawOnChartArea: false }, title: { display: true, text: 'SLA %', font: { size: 10 } } },
+                            x: { grid: { display: false }, ticks: { maxRotation: 45 } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('vendorMmChart').parentElement.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">Belum ada data vendor MM</p>';
+            }
+
+            // 11. Donut Chart - Inbound First Mile
+            const ifmLabels = {!! json_encode($inboundFmMetrics->pluck('status_inbound')) !!};
+            const ifmTotals = {!! json_encode($inboundFmMetrics->pluck('total')) !!};
+            const ifmColors = ['#14B8A6', '#6366F1', '#F59E0B', '#EF4444', '#06B6D4', '#8B5CF6', '#EC4899'];
+            if (ifmLabels.length > 0) {
+                new Chart(document.getElementById('inboundFmChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ifmLabels,
+                        datasets: [{ data: ifmTotals, backgroundColor: ifmColors.slice(0, ifmLabels.length), borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '62%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, padding: 12 } },
+                            tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw.toLocaleString('id-ID')} resi` } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('inboundFmChart').parentElement.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">Belum ada data Inbound FM</p>';
+            }
+
+            // 12. Bar - Status Akhir Detail
+            const saLabels = {!! json_encode($statusAkhirDistribution->pluck('final_status')) !!};
+            const saTotals = {!! json_encode($statusAkhirDistribution->pluck('total')) !!};
+            const saColors = saLabels.map(s => {
+                if (s === 'Completed') return '#10B981';
+                if (s === 'On Delivery') return '#3B82F6';
+                if (s === 'Undelivered') return '#EF4444';
+                return '#6B7280';
+            });
+            if (saLabels.length > 0) {
+                new Chart(document.getElementById('statusAkhirChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: saLabels,
+                        datasets: [{
+                            label: 'Jumlah Resi',
+                            data: saTotals,
+                            backgroundColor: saColors.map(c => c + 'CC'),
+                            borderColor: saColors,
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            maxBarThickness: 42,
+                            hoverBackgroundColor: saColors
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw.toLocaleString('id-ID')} resi` } } },
+                        scales: {
+                            x: { beginAtZero: true, ticks: { precision: 0, maxTicksLimit: 6 }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                            y: { grid: { display: false } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('statusAkhirChart').parentElement.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">Tidak ada data</p>';
+            }
 
         });
     </script>

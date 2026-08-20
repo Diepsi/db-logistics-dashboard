@@ -10,6 +10,7 @@ use App\Models\ShipmentIssue;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Services\ImportService;
+use App\Services\ShipmentImportService;
 use App\Support\ShipmentRowNormalizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -82,7 +83,7 @@ class ImportFlowTest extends TestCase
         $this->actingAs($user)
             ->post(route('imports.store'), ['excel_file' => $file])
             ->assertRedirect()
-            ->assertSessionHas('error', "Sheet 'RAW DATA' tidak ditemukan pada file Excel yang diunggah.");
+            ->assertSessionHas('error', "Sheet 'RAW DATA MM & LM' atau 'RAW DATA' atau 'DATA PENGIRIMAN' tidak ditemukan pada file Excel yang diunggah.");
     }
 
     public function test_upload_rejects_when_required_header_is_missing(): void
@@ -107,6 +108,7 @@ class ImportFlowTest extends TestCase
 
     public function test_canonical_key_maps_alias_headers_to_required_columns(): void
     {
+        // Template lama
         $this->assertSame('npsn', ShipmentRowNormalizer::canonicalKey('NPSN / Resi DB'));
         $this->assertSame('no_manifest', ShipmentRowNormalizer::canonicalKey('Manifest First Mile'));
         $this->assertSame('kabupatenkota', ShipmentRowNormalizer::canonicalKey('Kota/Kab Tujuan'));
@@ -116,6 +118,14 @@ class ImportFlowTest extends TestCase
         $this->assertSame('nama_sekolah', ShipmentRowNormalizer::canonicalKey('Nama Sekolah'));
         $this->assertSame('nama_sekolah', ShipmentRowNormalizer::canonicalKey('Sekolah'));
         $this->assertSame('nama_sekolah', ShipmentRowNormalizer::canonicalKey('Nama Sekolah / NPSN'));
+
+        // Template 2026
+        $this->assertSame('npsn', ShipmentRowNormalizer::canonicalKey('Nomor Redock'));
+        $this->assertSame('no_manifest', ShipmentRowNormalizer::canonicalKey('Delivery Order'));
+        $this->assertSame('vendor_mm', ShipmentRowNormalizer::canonicalKey('Vendor MM'));
+        $this->assertSame('nama_sekolah', ShipmentRowNormalizer::canonicalKey('NAMA SEKOLAH 2'));
+        $this->assertSame('nama_sekolah', ShipmentRowNormalizer::canonicalKey('NAMA SEKOLAH.1'));
+
         $this->assertNull(ShipmentRowNormalizer::canonicalKey('Kolom Tidak Dikenal'));
     }
 
@@ -152,7 +162,7 @@ class ImportFlowTest extends TestCase
         ]);
 
         $file = new UploadedFile($path, 'Report Pengiriman DB.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
-        $service = app(ImportService::class);
+        $service = app(ShipmentImportService::class);
 
         $preview = $service->preview($file);
         $this->assertSame(1, $preview['total']);
@@ -192,7 +202,7 @@ class ImportFlowTest extends TestCase
         $this->makeWorkbook($path, ['RAW DATA' => $rows]);
 
         $file = new UploadedFile($path, 'DenganBarisKosong.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
-        $service = app(ImportService::class);
+        $service = app(ShipmentImportService::class);
 
         $preview = $service->preview($file);
         $this->assertSame(2, $preview['total']);
@@ -209,6 +219,96 @@ class ImportFlowTest extends TestCase
         $result = $service->process($preview['token'], $batch->id);
         $this->assertSame(2, $result['new_rows']);
         $this->assertSame(2, Shipment::count());
+    }
+
+    public function test_preview_accepts_template_2026_without_pickup_columns(): void
+    {
+        $user = $this->createAdmin();
+        $path = tempnam(sys_get_temp_dir(), 'imp').'.xlsx';
+
+        $headers2026 = [
+            'No Resi', 'Nomor Redock', 'Delivery Order', 'Vendor LM', 'Provinsi', 'Kabupaten/Kota',
+            'Tgl HO dari SarTrans', 'ETA Delivery', 'SLA', 'Result Delivery for DB',
+            'SLA LM', 'Result LM', 'Status Update', 'Status Akhir', 'Nama Sekolah',
+        ];
+        $row2026 = [
+            'SHP-2026-001', 'NPSN-2026', 'MNF-2026', 'Vendor A', 'Provinsi B', 'Kota C',
+            '15/01/2026', '18/01/2026', 'On Time', 'Berhasil Dikirim',
+            'On Time', 'OK', 'Selesai', 'Delivered', 'SDN 2026',
+        ];
+
+        $this->makeWorkbook($path, [
+            'RAW DATA MM & LM' => [$headers2026, $row2026],
+        ]);
+
+        $file = new UploadedFile($path, 'Template2026.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+        $service = app(ShipmentImportService::class);
+
+        $preview = $service->preview($file);
+        $this->assertSame(1, $preview['total']);
+        $this->assertSame(1, $preview['valid']);
+        $this->assertSame(0, $preview['invalid']);
+
+        $batch = ImportBatch::create([
+            'file_name' => 'Template2026.xlsx',
+            'uploaded_by' => $user->id,
+            'status' => 'processing',
+        ]);
+
+        $result = $service->process($preview['token'], $batch->id);
+        $this->assertSame(1, $result['new_rows']);
+
+        $row = Shipment::where('waybill_no', 'SHP-2026-001')->first();
+        $this->assertSame('NPSN-2026', $row->npsn);
+        $this->assertSame('MNF-2026', $row->manifest_no);
+        $this->assertSame('SDN 2026', $row->school_name);
+        $this->assertNull($row->pickup_result);
+        $this->assertSame('On Time', $row->delivery_sla_status);
+        $this->assertSame('Completed', $row->final_status);
+    }
+
+    public function test_vendor_fallback_to_vendor_mm(): void
+    {
+        $user = $this->createAdmin();
+        $path = tempnam(sys_get_temp_dir(), 'imp').'.xlsx';
+
+        $headers = [
+            'No Resi', 'Nomor Redock', 'Delivery Order', 'Vendor LM', 'Vendor MM',
+            'Provinsi', 'Kabupaten/Kota', 'Tgl HO dari SarTrans',
+            'ETA Delivery', 'SLA', 'Result Delivery for DB',
+            'SLA LM', 'Result LM', 'Status Update', 'Status Akhir',
+        ];
+        $row = [
+            'SHP-VMM-001', 'NPSN-VMM', 'MNF-VMM', '', 'Vendor MM Alpha',
+            'Provinsi X', 'Kota Y', '15/01/2026',
+            '18/01/2026', 'On Time', 'Berhasil Dikirim',
+            'On Time', 'OK', 'Selesai', 'Delivered',
+        ];
+
+        $this->makeWorkbook($path, [
+            'RAW DATA MM & LM' => [$headers, $row],
+        ]);
+
+        $file = new UploadedFile($path, 'VendorMM.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+        $service = app(ShipmentImportService::class);
+
+        $preview = $service->preview($file);
+        $this->assertSame(1, $preview['valid']);
+
+        $batch = ImportBatch::create([
+            'file_name' => 'VendorMM.xlsx',
+            'uploaded_by' => $user->id,
+            'status' => 'processing',
+        ]);
+
+        $result = $service->process($preview['token'], $batch->id);
+        $this->assertSame(1, $result['new_rows']);
+
+        $row = Shipment::where('waybill_no', 'SHP-VMM-001')->first();
+        $this->assertSame('Vendor MM Alpha', $row->vendor_lm);
+
+        $vendor = Vendor::where('name', 'Vendor MM Alpha')->first();
+        $this->assertNotNull($vendor);
     }
 
     public function test_upload_rejects_unsupported_extension(): void
@@ -233,7 +333,7 @@ class ImportFlowTest extends TestCase
         ]);
 
         $file = new UploadedFile($path, 'Panthera.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
-        $service = app(ImportService::class);
+        $service = app(ShipmentImportService::class);
 
         $preview = $service->preview($file);
         $this->assertSame(3, $preview['total']);

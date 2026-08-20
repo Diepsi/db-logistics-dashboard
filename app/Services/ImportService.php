@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Exceptions\ImportException;
 use App\Exceptions\SheetNotFoundException;
 use App\Imports\ShipmentImport;
+use App\Support\Contracts\ImportNormalizer;
 use App\Support\ExcelStreamReader;
-use App\Support\ShipmentRowNormalizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -14,9 +14,12 @@ use Illuminate\Support\Str;
 
 class ImportService
 {
-    public const SHEET_NAME = 'RAW DATA';
-
-    public function preview(UploadedFile $file): array
+    /**
+     * Generic preview: validasi header, hitung baris valid/invalid/duplicate.
+     *
+     * @param  class-string<ImportNormalizer>  $normalizerClass
+     */
+    public function preview(UploadedFile $file, string $normalizerClass, array $sheetCandidates): array
     {
         ini_set('memory_limit', '1024M');
 
@@ -26,7 +29,8 @@ class ImportService
             $headers,
             $file->getClientOriginalExtension(),
             null,
-            self::SHEET_NAME
+            $sheetCandidates,
+            [$normalizerClass, 'canonicalKey']
         );
 
         try {
@@ -35,7 +39,7 @@ class ImportService
             $found = [];
 
             foreach ($headers as $header) {
-                $canonical = ShipmentRowNormalizer::canonicalKey($header);
+                $canonical = $normalizerClass::canonicalKey($header);
 
                 if ($canonical !== null) {
                     $found[$canonical] = true;
@@ -46,7 +50,7 @@ class ImportService
                 throw new ImportException('File Excel kosong atau tidak memiliki data.');
             }
 
-            $missing = array_values(array_diff(ShipmentRowNormalizer::REQUIRED_HEADERS, array_keys($found)));
+            $missing = array_values(array_diff($normalizerClass::REQUIRED_HEADERS, array_keys($found)));
 
             if ($missing !== []) {
                 throw new ImportException(
@@ -65,19 +69,19 @@ class ImportService
                 $row = $rows->current();
                 $rows->next();
 
-                if (ShipmentRowNormalizer::isEmptyRow($row)) {
+                if ($normalizerClass::isEmptyRow($row)) {
                     continue;
                 }
 
                 $total++;
 
-                $reason = ShipmentRowNormalizer::valid($row);
+                $reason = $normalizerClass::valid($row);
                 if ($reason !== null) {
                     $invalid++;
 
                     if (count($invalidSamples) < 10) {
                         $invalidSamples[] = [
-                            'no_resi' => $row['no_resi'] ?? null,
+                            'primary_key' => $row['no_resi'] ?? $row['waybill_no'] ?? $row[array_key_first($row)] ?? null,
                             'reason' => $reason,
                         ];
                     }
@@ -85,13 +89,13 @@ class ImportService
                     continue;
                 }
 
-                $waybill = trim((string) ($row['no_resi'] ?? ''));
-                if (isset($seenWaybills[$waybill])) {
+                $primaryKey = trim((string) ($row['no_resi'] ?? $row['waybill_no'] ?? $row[array_key_first($row)] ?? ''));
+                if (isset($seenWaybills[$primaryKey])) {
                     $duplicate++;
 
                     continue;
                 }
-                $seenWaybills[$waybill] = true;
+                $seenWaybills[$primaryKey] = true;
 
                 $valid++;
             }
@@ -111,8 +115,19 @@ class ImportService
         return compact('total', 'valid', 'invalid', 'duplicate', 'invalidSamples', 'token');
     }
 
-    public function process(string $token, int $batchId): array
-    {
+    /**
+     * Generic process: baca ulang file dari token, eksekusi import per chunk.
+     *
+     * @param  class-string<ImportNormalizer>  $normalizerClass
+     * @param  class-string                     $importClass  Maatwebsite Excel import class
+     */
+    public function process(
+        string $token,
+        int $batchId,
+        string $normalizerClass,
+        array $sheetCandidates,
+        string $importClass = ShipmentImport::class
+    ): array {
         ini_set('memory_limit', '1024M');
         ini_set('max_execution_time', '600');
 
@@ -126,12 +141,19 @@ class ImportService
         $filePath = $matches[0];
 
         try {
-            $import = new ShipmentImport($batchId);
+            $import = new $importClass($batchId);
 
             $headers = [];
             $chunk = [];
 
-            foreach (ExcelStreamReader::rows($filePath, $headers, null, null, self::SHEET_NAME) as $row) {
+            foreach (ExcelStreamReader::rows(
+                $filePath,
+                $headers,
+                null,
+                null,
+                $sheetCandidates,
+                [$normalizerClass, 'canonicalKey']
+            ) as $row) {
                 $chunk[] = $row;
 
                 if (count($chunk) >= 1000) {

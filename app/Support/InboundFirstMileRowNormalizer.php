@@ -1,0 +1,115 @@
+<?php
+
+namespace App\Support;
+
+use App\Support\Contracts\ImportNormalizer;
+
+class InboundFirstMileRowNormalizer implements ImportNormalizer
+{
+    public const REQUIRED_HEADERS = [
+        'no_resi', 'manifest_no', 'eta_pickup', 'status_inbound',
+    ];
+
+    public const OPTIONAL_HEADERS = [
+        'vendor_lm', 'provinsi', 'kabupatenkota', 'npsn', 'school_name',
+    ];
+
+    public const HEADER_ALIASES = [
+        'deliveryorder' => 'no_resi',
+        'manifestfirstmile' => 'manifest_no',
+        'etapickup' => 'eta_pickup',
+        'statusinbound' => 'status_inbound',
+        'fmstatus' => 'status_inbound',
+    ];
+
+    public const OPTIONAL_HEADER_ALIASES = [];
+
+    public static function valid(array $row): ?string
+    {
+        if (trim((string) ($row['no_resi'] ?? '')) === '') {
+            return 'No Resi kosong';
+        }
+
+        return null;
+    }
+
+    public static function key(string $key): string
+    {
+        $key = mb_strtolower(trim((string) $key));
+        $key = preg_replace('/[^a-z0-9]+/', '_', $key);
+
+        return trim($key, '_');
+    }
+
+    public static function canonicalKey(string $key): ?string
+    {
+        $stripped = self::stripped($key);
+
+        if ($stripped === '') {
+            return null;
+        }
+
+        foreach (self::REQUIRED_HEADERS as $canonical) {
+            if (self::stripped($canonical) === $stripped) {
+                return $canonical;
+            }
+        }
+
+        foreach (self::OPTIONAL_HEADERS as $canonical) {
+            if (self::stripped($canonical) === $stripped) {
+                return $canonical;
+            }
+        }
+
+        return self::OPTIONAL_HEADER_ALIASES[$stripped] ?? self::HEADER_ALIASES[$stripped] ?? null;
+    }
+
+    public static function isEmptyRow(array $row): bool
+    {
+        return trim((string) ($row['no_resi'] ?? '')) === '';
+    }
+
+    protected static function stripped(string $key): string
+    {
+        return preg_replace('/[^a-z0-9]+/', '', mb_strtolower((string) $key)) ?? '';
+    }
+
+    public static function normalizeRow(array $row): array
+    {
+        $normalized = [];
+
+        foreach ($row as $key => $value) {
+            $normalized[self::key($key)] = $value;
+        }
+
+        return $normalized;
+    }
+
+    public static function normalize(array $row, int $batchId, int $vendorId, ?int $locationId): array
+    {
+        $now = now();
+
+        return [
+            'import_batch_id' => $batchId,
+            'vendor_id' => $vendorId,
+            'waybill_no' => trim((string) ($row['no_resi'] ?? '')),
+            'manifest_no' => self::nullable($row['manifest_no'] ?? null),
+            'eta_pickup' => StatusNormalizer::parseDate($row['eta_pickup'] ?? null),
+            'status_inbound' => self::nullable($row['status_inbound'] ?? null),
+            'vendor_lm' => self::nullable($row['vendor_lm'] ?? null),
+            'province' => self::nullable($row['provinsi'] ?? null),
+            'city_regency' => self::nullable($row['kabupatenkota'] ?? null),
+            'npsn' => self::nullable($row['npsn'] ?? null),
+            'school_name' => self::nullable($row['school_name'] ?? null),
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
+    }
+
+    protected static function nullable(mixed $value): ?string
+    {
+        $string = trim((string) ($value ?? ''));
+
+        return $string === '' ? null : $string;
+    }
+}

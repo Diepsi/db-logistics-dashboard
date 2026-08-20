@@ -6,6 +6,10 @@ use App\Models\ImportBatch;
 use App\Models\Location;
 use App\Models\Shipment;
 use App\Models\ShipmentIssue;
+use App\Models\SlaMiddleMile;
+use App\Models\SlaLastMile;
+use App\Models\SlaAll;
+use App\Models\InboundFirstMile;
 use App\Models\Vendor;
 use App\Support\StatusNormalizer;
 use Illuminate\Database\Eloquent\Builder;
@@ -359,5 +363,145 @@ class DashboardService
             ->where('status', 'completed')
             ->latest('created_at')
             ->first();
+    }
+
+    /**
+     * Distribusi status BAST (Belum, Proses, Selesai) dan status Keuangan.
+     *
+     * @return array{bast: Collection, finance: Collection, bastTotal: int, financeTotal: int}
+     */
+    public function bastFinanceBreakdown(): array
+    {
+        $bastData = Shipment::select('bast_status', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('bast_status')
+            ->where('bast_status', '!=', '')
+            ->groupBy('bast_status')
+            ->orderByDesc('total')
+            ->get();
+
+        $financeData = Shipment::select('finance_status', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('finance_status')
+            ->where('finance_status', '!=', '')
+            ->groupBy('finance_status')
+            ->orderByDesc('total')
+            ->get();
+
+        $bastTotal = $bastData->sum('total');
+        $financeTotal = $financeData->sum('total');
+
+        return compact('bastData', 'financeData', 'bastTotal', 'financeTotal');
+    }
+
+    /**
+     * Perbandingan SLA MM vs LM per vendor (grouped bar chart).
+     * Mengambil vendor_mm dari sla_middle_miles dan vendor_lm dari sla_last_miles.
+     *
+     * @return Collection<int, mixed>
+     */
+    public function slaMmVsLmComparison(): Collection
+    {
+        $mmTokens = StatusNormalizer::slaTokens();
+        $mmIn = implode(',', array_map(fn ($t) => "'".str_replace("'", "''", $t)."'", $mmTokens));
+
+        $mm = SlaMiddleMile::select(
+            'vendor_mm as vendor',
+            DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_mm, ''))) IN ({$mmIn}) THEN 1 ELSE 0 END) as within_mm"),
+            DB::raw('COUNT(*) as total_mm')
+        )
+            ->whereNotNull('vendor_mm')
+            ->where('vendor_mm', '!=', '')
+            ->groupBy('vendor_mm')
+            ->get()
+            ->keyBy('vendor');
+
+        $lm = SlaLastMile::select(
+            'vendor_lm as vendor',
+            DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_lm, ''))) IN ({$mmIn}) THEN 1 ELSE 0 END) as within_lm"),
+            DB::raw('COUNT(*) as total_lm')
+        )
+            ->whereNotNull('vendor_lm')
+            ->where('vendor_lm', '!=', '')
+            ->groupBy('vendor_lm')
+            ->get()
+            ->keyBy('vendor');
+
+        $allVendors = $mm->keys()->merge($lm->keys())->unique()->values();
+
+        return $allVendors->map(function ($vendor) use ($mm, $lm) {
+            $mmTotal = $mm[$vendor]->total_mm ?? 0;
+            $mmWithin = $mm[$vendor]->within_mm ?? 0;
+            $lmTotal = $lm[$vendor]->total_lm ?? 0;
+            $lmWithin = $lm[$vendor]->within_lm ?? 0;
+
+            return (object) [
+                'vendor' => $vendor,
+                'mm_within' => $mmWithin,
+                'mm_total' => $mmTotal,
+                'mm_rate' => $mmTotal > 0 ? round(($mmWithin / $mmTotal) * 100, 1) : 0,
+                'lm_within' => $lmWithin,
+                'lm_total' => $lmTotal,
+                'lm_rate' => $lmTotal > 0 ? round(($lmWithin / $lmTotal) * 100, 1) : 0,
+            ];
+        })->sortByDesc('mm_total')->take(10)->values();
+    }
+
+    /**
+     * Performa vendor Middle Mile: volume, SLA rate, dan rata-rata waktu tempuh.
+     *
+     * @return Collection<int, mixed>
+     */
+    public function vendorMmPerformance(int $minVolume = 5, int $limit = 10): Collection
+    {
+        $tokens = StatusNormalizer::slaTokens();
+        $inList = implode(',', array_map(fn ($t) => "'".str_replace("'", "''", $t)."'", $tokens));
+
+        return SlaMiddleMile::select(
+            'vendor_mm as vendor',
+            DB::raw('COUNT(*) as total'),
+            DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_mm, ''))) IN ({$inList}) THEN 1 ELSE 0 END) as within_sla"),
+            DB::raw('AVG(TIMESTAMPDIFF(HOUR, eta_mm, tgl_sampai_kota_tujuan)) as avg_hours')
+        )
+            ->whereNotNull('vendor_mm')
+            ->where('vendor_mm', '!=', '')
+            ->groupBy('vendor_mm')
+            ->havingRaw('COUNT(*) >= ?', [$minVolume])
+            ->orderByDesc('total')
+            ->limit($limit)
+            ->get()
+            ->map(function ($row) {
+                $row->rate = $row->total > 0 ? round(($row->within_sla / $row->total) * 100, 1) : 0;
+                $row->avg_hours = round((float) ($row->avg_hours ?? 0), 1);
+
+                return $row;
+            });
+    }
+
+    /**
+     * Distribusi status Inbound First Mile ( dari FM ke gudang pusat).
+     *
+     * @return Collection<int, mixed>
+     */
+    public function inboundFirstMileMetrics(): Collection
+    {
+        return InboundFirstMile::select('status_inbound', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('status_inbound')
+            ->where('status_inbound', '!=', '')
+            ->groupBy('status_inbound')
+            ->orderByDesc('total')
+            ->get();
+    }
+
+    /**
+     * Distribusi detail Status Akhir (termasuk varian seperti Return to HO, dll).
+     *
+     * @return Collection<int, mixed>
+     */
+    public function statusAkhirDistribution(Builder $query): Collection
+    {
+        return (clone $query)
+            ->select('final_status', DB::raw('COUNT(*) as total'))
+            ->groupBy('final_status')
+            ->orderByDesc('total')
+            ->get();
     }
 }
