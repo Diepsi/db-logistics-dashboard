@@ -59,22 +59,50 @@ Alpine.directive('counter', (el) => {
 // Overlay loading halus untuk form filter (x-loading)
 Alpine.directive('loading', (el) => {
     el.addEventListener('submit', () => {
+        const dark = document.documentElement.classList.contains('dark');
         const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-[100] bg-white/70 backdrop-blur-sm flex items-center justify-center page-enter';
+        overlay.className = `fixed inset-0 z-[100] backdrop-blur-sm flex items-center justify-center page-enter ${dark ? 'bg-dbl-darker/70' : 'bg-white/70'}`;
         overlay.innerHTML = `
             <div class="flex flex-col items-center gap-3">
                 <div class="w-10 h-10 rounded-full border-4 border-dbl-green/30 border-t-dbl-green animate-spin"></div>
-                <span class="text-sm font-bold text-gray-600">Memuat data...</span>
+                <span class="text-sm font-bold ${dark ? 'text-gray-300' : 'text-gray-600'}">Memuat data...</span>
             </div>`;
         document.body.appendChild(overlay);
     });
 });
 
-// Default styling Chart.js agar konsisten di semua halaman
+// Default styling Chart.js agar konsisten di semua halaman & mengikuti tema
+const isDark = () => document.documentElement.classList.contains('dark');
+
+const applyChartTheme = (dark) => {
+    if (!window.Chart) return;
+
+    const tickColor = dark ? '#9CA3AF' : '#6B7280';
+    const gridColor = dark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.04)';
+
+    Chart.defaults.color = tickColor;
+
+    Object.values(Chart.instances || {}).forEach((chart) => {
+        try {
+            chart.options.color = tickColor;
+            Object.values(chart.options.scales || {}).forEach((scale) => {
+                scale.ticks = scale.ticks || {};
+                scale.ticks.color = tickColor;
+                if (scale.grid && scale.grid.drawOnChartArea !== false) {
+                    scale.grid.color = gridColor;
+                }
+            });
+            if (chart.options.plugins?.legend?.labels) {
+                chart.options.plugins.legend.labels.color = tickColor;
+            }
+            chart.update();
+        } catch (e) {}
+    });
+};
+
 if (window.Chart) {
     Chart.defaults.font.family = "'Figtree', ui-sans-serif, system-ui, sans-serif";
     Chart.defaults.font.size = 11;
-    Chart.defaults.color = '#6B7280';
     Chart.defaults.animation.duration = 900;
     Chart.defaults.animation.easing = 'easeOutQuart';
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(17, 24, 39, 0.92)';
@@ -85,6 +113,11 @@ if (window.Chart) {
     Chart.defaults.plugins.tooltip.bodyColor = '#E5E7EB';
     Chart.defaults.plugins.tooltip.borderColor = 'rgba(255, 255, 255, 0.08)';
     Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+    applyChartTheme(isDark());
 }
+
+// Sinkronkan chart yang sudah dirender saat tema diganti
+window.addEventListener('theme-changed', (e) => applyChartTheme(!!e.detail?.dark));
 
 Alpine.start();
