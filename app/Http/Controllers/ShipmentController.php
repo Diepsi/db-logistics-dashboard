@@ -8,14 +8,13 @@ use Illuminate\Http\Request;
 
 class ShipmentController extends Controller
 {
-    /**
-     * Tampilkan tabel data pengiriman (read-only) dengan pencarian & filter.
-     */
+    public function __construct(
+        private readonly DashboardService $service
+    ) {}
+
     public function index(Request $request)
     {
-        $service = app(DashboardService::class);
-
-        $query = $service->shipmentQuery($request)
+        $query = $this->service->shipmentQuery($request)
             ->when($request->filled('search'), function (Builder $q) use ($request) {
                 $search = trim($request->search);
                 $q->where(function (Builder $inner) use ($search) {
@@ -31,15 +30,16 @@ class ShipmentController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        $filterOptions = $service->filterOptions($request);
-        extract($filterOptions);
+        $filterOptions = $this->service->filterOptions($request);
 
-        return view('shipments.index', compact(
-            'shipments',
-            'provinces',
-            'cities',
-            'vendors',
-            'statuses'
-        ));
+        return view('shipments.index', array_merge(compact('shipments'), $filterOptions));
+    }
+
+    public function show(int $id)
+    {
+        $shipment = \App\Models\Shipment::with(['vendor', 'issues.resolvedBy', 'importBatch'])
+            ->findOrFail($id);
+
+        return view('shipments.show', compact('shipment'));
     }
 }

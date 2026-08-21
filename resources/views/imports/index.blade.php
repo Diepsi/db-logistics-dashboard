@@ -74,6 +74,7 @@
 
             <form action="{{ route('imports.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4" x-data="{ dragging: false }">
                 @csrf
+
                 <div class="flex items-center justify-center w-full">
                     <label for="dropzone-file" 
                            :class="dragging ? 'border-dbl-green bg-dbl-green-light/20 scale-[1.005] shadow-glow' : 'border-gray-300 bg-gray-50 hover:border-dbl-green hover:bg-dbl-green-light/20'"

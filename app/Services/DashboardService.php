@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
@@ -85,12 +86,17 @@ class DashboardService
      */
     public function filterOptions(Request $request): array
     {
-        $provinces = Shipment::select('province')
-            ->whereNotNull('province')
-            ->where('province', '!=', '')
-            ->distinct()
-            ->orderBy('province')
-            ->pluck('province');
+        $provinces = collect(
+            Cache::remember('dashboard:provinces', 300, fn () =>
+                Shipment::select('province')
+                    ->whereNotNull('province')
+                    ->where('province', '!=', '')
+                    ->distinct()
+                    ->orderBy('province')
+                    ->pluck('province')
+                    ->all()
+            )
+        );
 
         $cities = $request->filled('province')
             ? Location::where('province', $request->province)->orderBy('city_regency')->pluck('city_regency')
@@ -102,7 +108,11 @@ class DashboardService
                 ->limit(500)
                 ->pluck('city_regency');
 
-        $vendors = Vendor::orderBy('name')->get();
+        $vendors = Vendor::hydrate(
+            Cache::remember('dashboard:vendors', 300, fn () =>
+                Vendor::orderBy('name')->get()->toArray()
+            )
+        );
         $statuses = StatusNormalizer::FINAL_STATUSES;
 
         return compact('provinces', 'cities', 'vendors', 'statuses');
@@ -123,11 +133,7 @@ class DashboardService
             ['key' => 'vendor', 'label' => 'Vendor', 'column' => 'vendor_sla_status'],
         ];
 
-        $tokens = array_map(
-            fn (string $token) => "'".str_replace("'", "''", strtolower(trim($token)))."'",
-            StatusNormalizer::slaTokens()
-        );
-        $inList = implode(',', $tokens);
+        $inList = StatusNormalizer::sqlInList();
 
         $selects = [];
         foreach ($stages as $stage) {
@@ -359,10 +365,15 @@ class DashboardService
      */
     public function latestImport(): ?ImportBatch
     {
-        return ImportBatch::query()
-            ->where('status', 'completed')
-            ->latest('created_at')
-            ->first();
+        $row = Cache::remember('dashboard:latest_import', 120, fn () =>
+            ImportBatch::query()
+                ->where('status', 'completed')
+                ->latest('created_at')
+                ->first()
+                ?->toArray()
+        );
+
+        return $row !== null ? ImportBatch::hydrate([$row])->first() : null;
     }
 
     /**
@@ -372,24 +383,35 @@ class DashboardService
      */
     public function bastFinanceBreakdown(): array
     {
-        $bastData = Shipment::select('bast_status', DB::raw('COUNT(*) as total'))
-            ->whereNotNull('bast_status')
-            ->where('bast_status', '!=', '')
-            ->groupBy('bast_status')
-            ->orderByDesc('total')
-            ->get();
+        $cached = Cache::remember('dashboard:bast_finance', 300, function () {
+            $bastData = Shipment::select('bast_status', DB::raw('COUNT(*) as total'))
+                ->whereNotNull('bast_status')
+                ->where('bast_status', '!=', '')
+                ->groupBy('bast_status')
+                ->orderByDesc('total')
+                ->get()
+                ->toArray();
 
-        $financeData = Shipment::select('finance_status', DB::raw('COUNT(*) as total'))
-            ->whereNotNull('finance_status')
-            ->where('finance_status', '!=', '')
-            ->groupBy('finance_status')
-            ->orderByDesc('total')
-            ->get();
+            $financeData = Shipment::select('finance_status', DB::raw('COUNT(*) as total'))
+                ->whereNotNull('finance_status')
+                ->where('finance_status', '!=', '')
+                ->groupBy('finance_status')
+                ->orderByDesc('total')
+                ->get()
+                ->toArray();
 
-        $bastTotal = $bastData->sum('total');
-        $financeTotal = $financeData->sum('total');
+            return [
+                'bastData' => $bastData,
+                'financeData' => $financeData,
+                'bastTotal' => collect($bastData)->sum('total'),
+                'financeTotal' => collect($financeData)->sum('total'),
+            ];
+        });
 
-        return compact('bastData', 'financeData', 'bastTotal', 'financeTotal');
+        $cached['bastData'] = Shipment::hydrate($cached['bastData']);
+        $cached['financeData'] = Shipment::hydrate($cached['financeData']);
+
+        return $cached;
     }
 
     /**
@@ -400,49 +422,50 @@ class DashboardService
      */
     public function slaMmVsLmComparison(): Collection
     {
-        $mmTokens = StatusNormalizer::slaTokens();
-        $mmIn = implode(',', array_map(fn ($t) => "'".str_replace("'", "''", $t)."'", $mmTokens));
+        $inList = StatusNormalizer::sqlInList();
 
-        $mm = SlaMiddleMile::select(
-            'vendor_mm as vendor',
-            DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_mm, ''))) IN ({$mmIn}) THEN 1 ELSE 0 END) as within_mm"),
-            DB::raw('COUNT(*) as total_mm')
-        )
-            ->whereNotNull('vendor_mm')
-            ->where('vendor_mm', '!=', '')
-            ->groupBy('vendor_mm')
-            ->get()
-            ->keyBy('vendor');
+        return collect(Cache::remember('dashboard:sla_mm_lm', 300, function () use ($inList) {
+            $mm = SlaMiddleMile::select(
+                'vendor_mm as vendor',
+                DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_mm, ''))) IN ({$inList}) THEN 1 ELSE 0 END) as within_mm"),
+                DB::raw('COUNT(*) as total_mm')
+            )
+                ->whereNotNull('vendor_mm')
+                ->where('vendor_mm', '!=', '')
+                ->groupBy('vendor_mm')
+                ->get()
+                ->keyBy('vendor');
 
-        $lm = SlaLastMile::select(
-            'vendor_lm as vendor',
-            DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_lm, ''))) IN ({$mmIn}) THEN 1 ELSE 0 END) as within_lm"),
-            DB::raw('COUNT(*) as total_lm')
-        )
-            ->whereNotNull('vendor_lm')
-            ->where('vendor_lm', '!=', '')
-            ->groupBy('vendor_lm')
-            ->get()
-            ->keyBy('vendor');
+            $lm = SlaLastMile::select(
+                'vendor_lm as vendor',
+                DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_lm, ''))) IN ({$inList}) THEN 1 ELSE 0 END) as within_lm"),
+                DB::raw('COUNT(*) as total_lm')
+            )
+                ->whereNotNull('vendor_lm')
+                ->where('vendor_lm', '!=', '')
+                ->groupBy('vendor_lm')
+                ->get()
+                ->keyBy('vendor');
 
-        $allVendors = $mm->keys()->merge($lm->keys())->unique()->values();
+            $allVendors = $mm->keys()->merge($lm->keys())->unique()->values();
 
-        return $allVendors->map(function ($vendor) use ($mm, $lm) {
-            $mmTotal = $mm[$vendor]->total_mm ?? 0;
-            $mmWithin = $mm[$vendor]->within_mm ?? 0;
-            $lmTotal = $lm[$vendor]->total_lm ?? 0;
-            $lmWithin = $lm[$vendor]->within_lm ?? 0;
+            return $allVendors->map(function ($vendor) use ($mm, $lm) {
+                $mmTotal = $mm[$vendor]->total_mm ?? 0;
+                $mmWithin = $mm[$vendor]->within_mm ?? 0;
+                $lmTotal = $lm[$vendor]->total_lm ?? 0;
+                $lmWithin = $lm[$vendor]->within_lm ?? 0;
 
-            return (object) [
-                'vendor' => $vendor,
-                'mm_within' => $mmWithin,
-                'mm_total' => $mmTotal,
-                'mm_rate' => $mmTotal > 0 ? round(($mmWithin / $mmTotal) * 100, 1) : 0,
-                'lm_within' => $lmWithin,
-                'lm_total' => $lmTotal,
-                'lm_rate' => $lmTotal > 0 ? round(($lmWithin / $lmTotal) * 100, 1) : 0,
-            ];
-        })->sortByDesc('mm_total')->take(10)->values();
+                return [
+                    'vendor' => $vendor,
+                    'mm_within' => $mmWithin,
+                    'mm_total' => $mmTotal,
+                    'mm_rate' => $mmTotal > 0 ? round(($mmWithin / $mmTotal) * 100, 1) : 0,
+                    'lm_within' => $lmWithin,
+                    'lm_total' => $lmTotal,
+                    'lm_rate' => $lmTotal > 0 ? round(($lmWithin / $lmTotal) * 100, 1) : 0,
+                ];
+            })->sortByDesc('mm_total')->take(10)->values()->all();
+        }));
     }
 
     /**
@@ -452,28 +475,31 @@ class DashboardService
      */
     public function vendorMmPerformance(int $minVolume = 5, int $limit = 10): Collection
     {
-        $tokens = StatusNormalizer::slaTokens();
-        $inList = implode(',', array_map(fn ($t) => "'".str_replace("'", "''", $t)."'", $tokens));
+        $inList = StatusNormalizer::sqlInList();
 
-        return SlaMiddleMile::select(
-            'vendor_mm as vendor',
-            DB::raw('COUNT(*) as total'),
-            DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_mm, ''))) IN ({$inList}) THEN 1 ELSE 0 END) as within_sla"),
-            DB::raw('AVG(TIMESTAMPDIFF(HOUR, eta_mm, tgl_sampai_kota_tujuan)) as avg_hours')
-        )
-            ->whereNotNull('vendor_mm')
-            ->where('vendor_mm', '!=', '')
-            ->groupBy('vendor_mm')
-            ->havingRaw('COUNT(*) >= ?', [$minVolume])
-            ->orderByDesc('total')
-            ->limit($limit)
-            ->get()
-            ->map(function ($row) {
-                $row->rate = $row->total > 0 ? round(($row->within_sla / $row->total) * 100, 1) : 0;
-                $row->avg_hours = round((float) ($row->avg_hours ?? 0), 1);
-
-                return $row;
-            });
+        return collect(Cache::remember('dashboard:vendor_mm', 300, function () use ($inList, $minVolume, $limit) {
+            return SlaMiddleMile::select(
+                'vendor_mm as vendor',
+                DB::raw('COUNT(*) as total'),
+                DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_mm, ''))) IN ({$inList}) THEN 1 ELSE 0 END) as within_sla"),
+                DB::raw('AVG(TIMESTAMPDIFF(HOUR, eta_mm, tgl_sampai_kota_tujuan)) as avg_hours')
+            )
+                ->whereNotNull('vendor_mm')
+                ->where('vendor_mm', '!=', '')
+                ->groupBy('vendor_mm')
+                ->havingRaw('COUNT(*) >= ?', [$minVolume])
+                ->orderByDesc('total')
+                ->limit($limit)
+                ->get()
+                ->map(fn ($row) => [
+                    'vendor' => $row->vendor,
+                    'total' => (int) $row->total,
+                    'within_sla' => (int) $row->within_sla,
+                    'rate' => $row->total > 0 ? round(($row->within_sla / $row->total) * 100, 1) : 0,
+                    'avg_hours' => round((float) ($row->avg_hours ?? 0), 1),
+                ])
+                ->all();
+        }));
     }
 
     /**
@@ -483,12 +509,19 @@ class DashboardService
      */
     public function inboundFirstMileMetrics(): Collection
     {
-        return InboundFirstMile::select('status_inbound', DB::raw('COUNT(*) as total'))
-            ->whereNotNull('status_inbound')
-            ->where('status_inbound', '!=', '')
-            ->groupBy('status_inbound')
-            ->orderByDesc('total')
-            ->get();
+        return collect(Cache::remember('dashboard:inbound_fm', 300, fn () =>
+            InboundFirstMile::select('status_inbound', DB::raw('COUNT(*) as total'))
+                ->whereNotNull('status_inbound')
+                ->where('status_inbound', '!=', '')
+                ->groupBy('status_inbound')
+                ->orderByDesc('total')
+                ->get()
+                ->map(fn ($row) => [
+                    'status_inbound' => $row->status_inbound,
+                    'total' => (int) $row->total,
+                ])
+                ->all()
+        ));
     }
 
     /**
@@ -502,6 +535,59 @@ class DashboardService
             ->select('final_status', DB::raw('COUNT(*) as total'))
             ->groupBy('final_status')
             ->orderByDesc('total')
+            ->get();
+    }
+
+    /**
+     * Tren volume pengiriman harian (volume + SLA rate).
+     *
+     * @return Collection<int, mixed>
+     */
+    public function dailyTrend(Builder $query): Collection
+    {
+        return (clone $query)
+            ->selectRaw('DATE(ho_date) as date, COUNT(*) as total, SUM(CASE WHEN is_within_sla = 1 THEN 1 ELSE 0 END) as within_sla')
+            ->whereNotNull('ho_date')
+            ->groupByRaw('DATE(ho_date)')
+            ->orderBy('date')
+            ->get();
+    }
+
+    /**
+     * Top N provinsi berdasarkan volume pengiriman.
+     *
+     * @return Collection<int, mixed>
+     */
+    public function provinceDistribution(Builder $query, int $limit = 5): Collection
+    {
+        return (clone $query)
+            ->select('province', DB::raw('count(*) as total'))
+            ->whereNotNull('province')
+            ->where('province', '!=', '')
+            ->groupBy('province')
+            ->orderByDesc('total')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Top N vendor berdasarkan volume & SLA rate.
+     *
+     * @return Collection<int, mixed>
+     */
+    public function vendorDistribution(Builder $query, int $limit = 5): Collection
+    {
+        return (clone $query)
+            ->select(
+                'vendor_lm',
+                DB::raw('count(*) as total'),
+                DB::raw('SUM(CASE WHEN is_within_sla = 1 THEN 1 ELSE 0 END) as on_time')
+            )
+            ->whereNotNull('vendor_lm')
+            ->where('vendor_lm', '!=', '')
+            ->groupBy('vendor_lm')
+            ->orderByDesc('total')
+            ->limit($limit)
             ->get();
     }
 }

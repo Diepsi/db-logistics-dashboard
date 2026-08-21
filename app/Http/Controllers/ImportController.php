@@ -8,55 +8,12 @@ use App\Models\Location;
 use App\Models\Shipment;
 use App\Models\ShipmentIssue;
 use App\Models\Vendor;
-use App\Services\IssueImportService;
-use App\Services\SlaAllImportService;
-use App\Services\SlaLastMileImportService;
-use App\Services\SlaMiddleMileImportService;
-use App\Services\InboundFirstMileImportService;
 use App\Services\ShipmentImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ImportController extends Controller
 {
-    /**
-     * Daftar module → service class.
-     */
-    private const MODULE_SERVICES = [
-        'shipment' => ShipmentImportService::class,
-        'issue' => IssueImportService::class,
-        'sla-mm' => SlaMiddleMileImportService::class,
-        'sla-lm' => SlaLastMileImportService::class,
-        'sla-all' => SlaAllImportService::class,
-        'inbound-fm' => InboundFirstMileImportService::class,
-    ];
-
-    /**
-     * Daftar module → label untuk UI.
-     */
-    private const MODULE_LABELS = [
-        'shipment' => 'Data Pengiriman',
-        'issue' => 'Issue Pengiriman',
-        'sla-mm' => 'SLA Middle Mile',
-        'sla-lm' => 'SLA Last Mile',
-        'sla-all' => 'SLA All',
-        'inbound-fm' => 'Inbound / First Mile',
-    ];
-
-    /**
-     * Resolve service class berdasarkan nama module.
-     */
-    private function resolveService(string $module): object
-    {
-        $serviceClass = self::MODULE_SERVICES[$module] ?? null;
-
-        if ($serviceClass === null) {
-            abort(404, 'Modul import tidak dikenali: '.$module);
-        }
-
-        return app($serviceClass);
-    }
-
     /**
      * Tampilkan Halaman Import & Riwayat Upload
      */
@@ -167,11 +124,11 @@ class ImportController extends Controller
         DB::beginTransaction();
 
         try {
-            ShipmentIssue::query()->delete();
-            Shipment::query()->delete();
-            ImportBatch::query()->delete();
-            Vendor::query()->delete();
-            Location::query()->delete();
+            ShipmentIssue::query()->forceDelete();
+            Shipment::query()->forceDelete();
+            ImportBatch::query()->forceDelete();
+            Vendor::query()->forceDelete();
+            Location::query()->forceDelete();
 
             DB::commit();
 

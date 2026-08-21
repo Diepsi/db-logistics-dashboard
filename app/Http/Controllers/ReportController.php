@@ -10,46 +10,29 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
-    /**
-     * Halaman Laporan & Export
-     */
+    public function __construct(
+        private readonly DashboardService $service
+    ) {}
+
     public function index(Request $request)
     {
-        $service = app(DashboardService::class);
+        $kpis = $this->service->kpis($this->service->shipmentQuery($request));
+        $filterOptions = $this->service->filterOptions($request);
 
-        $kpis = $service->kpis($service->shipmentQuery($request));
-
-        $filterOptions = $service->filterOptions($request);
-        extract($filterOptions);
-
-        return view('reports.index', compact(
-            'kpis',
-            'provinces',
-            'cities',
-            'vendors',
-            'statuses'
-        ));
+        return view('reports.index', array_merge(compact('kpis'), $filterOptions));
     }
 
-    /**
-     * Unduh laporan terfilter dalam format Excel
-     */
     public function exportExcel(Request $request)
     {
-        $query = app(DashboardService::class)->shipmentQuery($request);
+        $query = $this->service->shipmentQuery($request);
 
         return Excel::download(new ShipmentsExport($query), 'laporan-pengiriman.xlsx');
     }
 
-    /**
-     * Unduh laporan terfilter dalam format PDF (ringkasan KPI + daftar pengiriman)
-     */
     public function exportPdf(Request $request)
     {
-        $service = app(DashboardService::class);
-        $query = $service->shipmentQuery($request);
-
-        $kpis = $service->kpis($query);
+        $query = $this->service->shipmentQuery($request);
+        $kpis = $this->service->kpis($query);
         $shipments = (clone $query)
             ->with('vendor')
             ->orderByDesc('ho_date')

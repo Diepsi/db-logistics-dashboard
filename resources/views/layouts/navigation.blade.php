@@ -53,6 +53,16 @@
                 <span>Data Pengiriman</span>
             </a>
 
+            <!-- Issue Management -->
+            <a href="{{ route('issues.index') }}"
+               class="group relative flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('issues.*') ? 'bg-gradient-to-r from-dbl-green/15 to-dbl-green/5 text-dbl-green-light font-bold shadow-md shadow-dbl-green/10' : 'text-gray-300 hover:bg-white/5 hover:text-white' }}">
+                <span class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-dbl-green shadow-glow transition-all {{ request()->routeIs('issues.*') ? 'opacity-100' : 'opacity-0 group-hover:opacity-40' }}"></span>
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>Issue Management</span>
+            </a>
+
             @if(auth()->user()?->hasRole('admin') || auth()->user()?->hasRole('project-manager'))
                 @if(auth()->user()?->hasRole('admin'))
                     <!-- Admin Section -->

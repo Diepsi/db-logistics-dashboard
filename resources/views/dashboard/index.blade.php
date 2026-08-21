@@ -31,6 +31,17 @@
 
             <form method="GET" action="{{ route('dashboard') }}" x-loading class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
 
+                <div class="sm:col-span-2 lg:col-span-4 xl:col-span-8">
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cepat:</span>
+                        <button type="button" onclick="setQuickDate(7)" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-dbl-green-light/60 hover:text-dbl-green-dark transition-colors cursor-pointer">7 Hari</button>
+                        <button type="button" onclick="setQuickDate(30)" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-dbl-green-light/60 hover:text-dbl-green-dark transition-colors cursor-pointer">30 Hari</button>
+                        <button type="button" onclick="setQuickDate(90)" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-dbl-green-light/60 hover:text-dbl-green-dark transition-colors cursor-pointer">90 Hari</button>
+                        <button type="button" onclick="setMonthThis()" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-dbl-green-light/60 hover:text-dbl-green-dark transition-colors cursor-pointer">Bulan Ini</button>
+                        <button type="button" onclick="setMonthLast()" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-dbl-green-light/60 hover:text-dbl-green-dark transition-colors cursor-pointer">Bulan Lalu</button>
+                    </div>
+                </div>
+
                 <div>
                     <label class="field-label">Tanggal Mulai (HO)</label>
                     <input type="date" name="start_date" value="{{ request('start_date') }}" class="field-input">
@@ -53,7 +64,7 @@
 
                 <div>
                     <label class="field-label">Kabupaten/Kota</label>
-                    <select name="city_regency" class="field-input">
+                    <select name="city_regency" class="field-input" onchange="this.form.submit()">
                         <option value="">Semua Kota</option>
                         @foreach($cities as $city)
                             <option value="{{ $city }}" {{ request('city_regency') == $city ? 'selected' : '' }}>{{ $city }}</option>
@@ -99,6 +110,30 @@
                     </button>
                 </div>
 
+                <script>
+                    function setQuickDate(days) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setDate(end.getDate() - days);
+                        document.querySelector('input[name="start_date"]').value = start.toISOString().split('T')[0];
+                        document.querySelector('input[name="end_date"]').value = end.toISOString().split('T')[0];
+                    }
+                    function setMonthThis() {
+                        const now = new Date();
+                        const first = new Date(now.getFullYear(), now.getMonth(), 1);
+                        const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                        document.querySelector('input[name="start_date"]').value = first.toISOString().split('T')[0];
+                        document.querySelector('input[name="end_date"]').value = last.toISOString().split('T')[0];
+                    }
+                    function setMonthLast() {
+                        const now = new Date();
+                        const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                        const last = new Date(now.getFullYear(), now.getMonth(), 0);
+                        document.querySelector('input[name="start_date"]').value = first.toISOString().split('T')[0];
+                        document.querySelector('input[name="end_date"]').value = last.toISOString().split('T')[0];
+                    }
+                </script>
+
             </form>
         </div>
 
@@ -131,6 +166,21 @@
             </span>
         </div>
 
+        <!-- ==================== SLA ALERT BANNER ==================== -->
+        @if($kpis['totalShipments'] > 0 && $kpis['slaAchievementRate'] < 85)
+            <div class="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-rose-50 border border-amber-200 rounded-2xl px-5 py-3.5 shadow-card" x-reveal>
+                <span class="icon-chip bg-amber-100 text-amber-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </span>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-amber-800">Peringatan: SLA Achievement Rate di bawah target (85%)</p>
+                    <p class="text-xs text-amber-600">Tingkat kepatuhan SLA saat ini <span class="font-bold">{{ $kpis['slaAchievementRate'] }}%</span>. Perlu tindakan perbaikan segera.</p>
+                </div>
+                <span class="text-2xl font-black text-amber-600 tabular-nums">{{ $kpis['slaAchievementRate'] }}%</span>
+            </div>
+        @endif
 
         <!-- ==================== SECTION 2: KPI CARDS (7 KPI Utama) ==================== -->
         @php

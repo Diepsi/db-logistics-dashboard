@@ -44,6 +44,19 @@ class StatusNormalizer
         return self::$slaMap;
     }
 
+    /**
+     * Build a raw SQL IN (...) literal from SLA tokens, safe for use in selectRaw().
+     */
+    public static function sqlInList(): string
+    {
+        $escaped = array_map(
+            fn (string $token) => "'".str_replace("'", "''", strtolower(trim($token)))."'",
+            self::slaTokens()
+        );
+
+        return implode(',', $escaped);
+    }
+
     public static function finalStatus(?string $value): string
     {
         $key = strtolower(trim((string) $value));
