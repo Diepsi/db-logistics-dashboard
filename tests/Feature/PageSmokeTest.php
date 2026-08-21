@@ -44,14 +44,15 @@ class PageSmokeTest extends TestCase
         $this->actingAs($pm)->get('/imports')->assertForbidden();
     }
 
-    public function test_staff_can_only_access_dashboard_and_shipments(): void
+    public function test_staff_can_access_operational_pages_but_not_admin_modules(): void
     {
         $staff = $this->createUserWithRole('staff');
 
         $this->actingAs($staff)->get('/dashboard')->assertOk();
         $this->actingAs($staff)->get('/shipments')->assertOk();
+        $this->actingAs($staff)->get('/analytics')->assertOk();
+        $this->actingAs($staff)->get('/reports')->assertOk();
         $this->actingAs($staff)->get('/imports')->assertForbidden();
-        $this->actingAs($staff)->get('/reports')->assertForbidden();
     }
 
     public function test_admin_can_download_reports(): void

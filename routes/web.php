@@ -38,8 +38,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
     });
 
-    // Modul Laporan & Export — Admin & Project Manager
-    Route::middleware('role:admin,project-manager')->group(function () {
+    // Modul Analitik, Laporan & Export — Admin, Project Manager & Staff
+    Route::middleware('role:admin,project-manager,staff')->group(function () {
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
