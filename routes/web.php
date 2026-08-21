@@ -20,6 +20,7 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard KPI & Data Pengiriman (semua role terautentikasi)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/shipments', [ShipmentController::class, 'index'])->name('shipments.index');
+    Route::get('/shipments-search', [ShipmentController::class, 'search'])->name('shipments.search');
     Route::get('/shipments/{id}', [ShipmentController::class, 'show'])->name('shipments.show');
 
     // Issue Management

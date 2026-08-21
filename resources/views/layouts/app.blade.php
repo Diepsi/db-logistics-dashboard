@@ -72,8 +72,18 @@
                         </div>
                     </div>
 
-                    <!-- Right: Theme Toggle, Network Status & User Profile -->
+                    <!-- Right: Quick Search, Theme Toggle, Network Status & User Profile -->
                     <div class="flex items-center space-x-4">
+                        <!-- Quick AWB Search (Ctrl+K) -->
+                        <button type="button" x-data @click="$dispatch('open-command-palette')"
+                                class="flex items-center gap-2 p-2 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors focus:outline-none dark:text-slate-400 dark:hover:text-indigo-400 dark:hover:bg-slate-800"
+                                title="Cari No. Resi / Sekolah (Ctrl+K)">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <kbd class="hidden md:inline-flex items-center rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-400 dark:border-slate-700 dark:bg-slate-800">Ctrl K</kbd>
+                        </button>
+
                         <!-- Toggle Tema Gelap/Terang -->
                         <button type="button"
                                 x-data
@@ -196,6 +206,153 @@
 
         </div>
     </div>
+
+    <!-- ==================== COMMAND PALETTE (Ctrl+K) ==================== -->
+    <div x-data="commandPalette" @open-command-palette.window="show()" x-cloak>
+        <div x-show="open" x-transition.opacity.duration.150ms
+             class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm"
+             @click="close()"></div>
+
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-150"
+             x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed inset-x-4 top-[12vh] sm:inset-x-0 sm:max-w-xl mx-auto z-50">
+            <div class="bg-white rounded-2xl shadow-lift border border-slate-200 overflow-hidden dark:bg-slate-900 dark:border-slate-700">
+                <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                    <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" x-ref="input" x-model="q"
+                           @keydown.arrow-down.prevent="moveDown()"
+                           @keydown.arrow-up.prevent="moveUp()"
+                           @keydown.enter.prevent="goSelected()"
+                           placeholder="Cari No. Resi / AWB atau nama sekolah..."
+                           class="w-full bg-transparent text-sm font-medium text-gray-800 placeholder:text-slate-400 focus:outline-none dark:text-gray-100" />
+                    <span x-show="loading" class="shrink-0 w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></span>
+                    <kbd class="hidden sm:inline-flex shrink-0 items-center rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-400 dark:border-slate-700 dark:bg-slate-800">Esc</kbd>
+                </div>
+
+                <div class="max-h-80 overflow-y-auto">
+                    <template x-if="q.trim().length >= 2 && !loading && results.length === 0">
+                        <p class="px-4 py-8 text-center text-sm text-slate-400 font-medium">Tidak ada pengiriman yang cocok.</p>
+                    </template>
+
+                    <template x-if="q.trim().length < 2">
+                        <p class="px-4 py-8 text-center text-sm text-slate-400 font-medium">Ketik minimal 2 karakter untuk mencari.</p>
+                    </template>
+
+                    <ul class="py-1.5">
+                        <template x-for="(item, index) in results" :key="item.id">
+                            <li>
+                                <button type="button" @click="go(item)" @mouseenter="selectedIndex = index"
+                                        class="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors"
+                                        :class="selectedIndex === index ? 'bg-indigo-50 dark:bg-slate-800' : ''">
+                                    <span class="min-w-0">
+                                        <span class="block text-sm font-bold font-mono text-gray-800 truncate dark:text-gray-100" x-text="item.waybill_no"></span>
+                                        <span class="block text-xs text-slate-400 truncate" x-text="[item.school_name, item.city_regency].filter(Boolean).join(' · ')"></span>
+                                    </span>
+                                    <span class="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                                          :class="{
+                                              'bg-emerald-50 text-emerald-700': item.final_status === 'Completed',
+                                              'bg-blue-50 text-blue-700': item.final_status === 'On Delivery',
+                                              'bg-rose-50 text-rose-700': item.final_status === 'Undelivered',
+                                              'bg-gray-100 text-gray-500': !['Completed','On Delivery','Undelivered'].includes(item.final_status),
+                                          }" x-text="item.final_status"></span>
+                                </button>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('commandPalette', () => ({
+                open: false,
+                q: '',
+                results: [],
+                loading: false,
+                selectedIndex: 0,
+                debounceTimer: null,
+
+                init() {
+                    window.addEventListener('keydown', (event) => {
+                        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                            event.preventDefault();
+                            this.open ? this.close() : this.show();
+                        }
+                        if (event.key === 'Escape' && this.open) {
+                            this.close();
+                        }
+                    });
+
+                    this.$watch('q', () => this.scheduleSearch());
+                },
+
+                show() {
+                    this.open = true;
+                    this.$nextTick(() => this.$refs.input?.focus());
+                },
+
+                close() {
+                    this.open = false;
+                    this.q = '';
+                    this.results = [];
+                    this.selectedIndex = 0;
+                },
+
+                scheduleSearch() {
+                    clearTimeout(this.debounceTimer);
+
+                    if (this.q.trim().length < 2) {
+                        this.results = [];
+                        return;
+                    }
+
+                    this.debounceTimer = setTimeout(() => this.search(), 250);
+                },
+
+                async search() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch("{{ route('shipments.search') }}?q=" + encodeURIComponent(this.q), {
+                            headers: { Accept: 'application/json' },
+                        });
+                        const data = await res.json();
+                        this.results = data.results ?? [];
+                        this.selectedIndex = 0;
+                    } catch (error) {
+                        this.results = [];
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                moveDown() {
+                    if (this.selectedIndex < this.results.length - 1) this.selectedIndex++;
+                },
+
+                moveUp() {
+                    if (this.selectedIndex > 0) this.selectedIndex--;
+                },
+
+                goSelected() {
+                    const item = this.results[this.selectedIndex];
+                    if (item) this.go(item);
+                },
+
+                go(item) {
+                    window.location.href = "{{ url('shipments') }}/" + item.id;
+                },
+            }));
+        });
+    </script>
 
 </body>
 </html>

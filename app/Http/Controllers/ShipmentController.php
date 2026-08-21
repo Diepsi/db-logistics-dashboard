@@ -35,6 +35,29 @@ class ShipmentController extends Controller
         return view('shipments.index', array_merge(compact('shipments'), $filterOptions));
     }
 
+    /**
+     * Endpoint JSON untuk quick AWB search (command palette Ctrl+K).
+     */
+    public function search(Request $request)
+    {
+        $term = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json(['results' => []]);
+        }
+
+        $results = \App\Models\Shipment::query()
+            ->where(function (Builder $q) use ($term) {
+                $q->where('waybill_no', 'like', "%{$term}%")
+                    ->orWhere('school_name', 'like', "%{$term}%");
+            })
+            ->orderBy('waybill_no')
+            ->limit(8)
+            ->get(['id', 'waybill_no', 'school_name', 'city_regency', 'final_status']);
+
+        return response()->json(['results' => $results]);
+    }
+
     public function show(int $id)
     {
         $shipment = \App\Models\Shipment::with([
