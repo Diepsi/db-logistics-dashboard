@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\Shipment;
 use App\Models\ShipmentIssue;
 use App\Models\User;
+use App\Services\AnalyticsService;
 use App\Services\DashboardService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -122,14 +123,12 @@ class DashboardFeatureTest extends TestCase
 
         $this->actingAs($user)->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('Kesegaran Data')
-            ->assertSee('Kepatuhan SLA per Tahap')
-            ->assertSee('Rata-rata Lead Time')
-            ->assertSee('Vendor dengan Over-SLA Tertinggi')
-            ->assertSee('Undelivered per Wilayah')
-            ->assertSee('Issue Terbuka')
-            ->assertSee('Dispatch Terbaru')
-            ->assertSee('Tren Pengiriman per Bulan');
+            ->assertSee('Komposisi Status Pengiriman')
+            ->assertSee('Kepatuhan SLA')
+            ->assertSee('Tren Pengiriman Harian')
+            ->assertSee('Needs Attention')
+            ->assertSee('Recent Activity')
+            ->assertSee('Latest Import');
     }
 
     public function test_sla_filter_restricts_dashboard_data(): void
@@ -153,9 +152,9 @@ class DashboardFeatureTest extends TestCase
     public function test_sla_stage_funnel_uses_sla_status_columns(): void
     {
         $this->createShipments();
-        $service = app(DashboardService::class);
+        $service = app(AnalyticsService::class);
 
-        $breakdown = $service->slaStageBreakdown($service->shipmentQuery(request()));
+        $breakdown = $service->slaStageBreakdown(app(DashboardService::class)->shipmentQuery(request()));
 
         $byKey = collect($breakdown)->keyBy('key');
 
@@ -181,9 +180,9 @@ class DashboardFeatureTest extends TestCase
     public function test_lead_times_calculated_in_days(): void
     {
         $this->createShipments();
-        $service = app(DashboardService::class);
+        $service = app(AnalyticsService::class);
 
-        $leadTimes = $service->leadTimes($service->shipmentQuery(request()));
+        $leadTimes = $service->leadTimes(app(DashboardService::class)->shipmentQuery(request()));
 
         // SHP-00001: HO->Pickup = 1 hari, HO->Delivery = 3 hari
         // SHP-00002: HO->Pickup = 1 hari, HO->Delivery = 3 hari
@@ -264,9 +263,9 @@ class DashboardFeatureTest extends TestCase
             ]);
         }
 
-        $service = app(DashboardService::class);
+        $service = app(AnalyticsService::class);
 
-        $worst = $service->worstVendors($service->shipmentQuery(request()));
+        $worst = $service->worstVendors(app(DashboardService::class)->shipmentQuery(request()));
 
         // Vendor A: 11/12 over SLA = 91.7%, Vendor B: 0/12 over SLA = 0%
         $this->assertCount(2, $worst);
@@ -279,9 +278,9 @@ class DashboardFeatureTest extends TestCase
     public function test_worst_regions_counts_undelivered(): void
     {
         $this->createShipments();
-        $service = app(DashboardService::class);
+        $service = app(AnalyticsService::class);
 
-        $regions = $service->worstRegions($service->shipmentQuery(request()));
+        $regions = $service->worstRegions(app(DashboardService::class)->shipmentQuery(request()));
 
         $this->assertSame(1, $regions['provinces']->first()->undelivered);
         $this->assertSame('DKI Jakarta', $regions['provinces']->first()->province);
@@ -289,14 +288,21 @@ class DashboardFeatureTest extends TestCase
         $this->assertSame('Jakarta Selatan', $regions['cities']->first()->city_regency);
     }
 
-    public function test_open_issues_only_counts_matching_scope(): void
+    public function test_needs_attention_includes_open_issue_and_delays(): void
     {
         $this->createShipments();
         $service = app(DashboardService::class);
 
-        $issues = $service->openIssues(request());
-        $this->assertSame(1, $issues['total']);
-        $this->assertSame('Alamat Tidak Lengkap', $issues['items']->first()->issue_type);
+        $items = collect($service->needsAttention(request()));
+
+        $issueItems = $items->where('type', 'issue');
+        $this->assertSame(1, $issueItems->count());
+        $this->assertSame('Alamat Tidak Lengkap', $issueItems->first()['label']);
+        $this->assertSame('SHP-00003', $issueItems->first()['waybill_no']);
+
+        // Delay items: 1 Undelivered (SHP-00003) + 1 Over SLA (SHP-00002)
+        $delayItems = $items->where('type', 'delay');
+        $this->assertSame(2, $delayItems->count());
     }
 
     public function test_shipments_index_accepts_sla_filter(): void

@@ -12,13 +12,13 @@ class ExampleTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * A basic test example.
+     * Halaman utama mengarahkan guest ke halaman login.
      */
-    public function test_homepage_is_accessible_to_guest(): void
+    public function test_homepage_redirects_guest_to_login(): void
     {
         $response = $this->get('/');
 
-        $response->assertOk();
+        $response->assertRedirect(route('login'));
     }
 
     public function test_authenticated_user_can_access_dashboard(): void

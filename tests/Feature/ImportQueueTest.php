@@ -6,6 +6,7 @@ use App\Jobs\ProcessImportJob;
 use App\Models\ImportBatch;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AnomalyDetectionService;
 use App\Services\ShipmentImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -113,7 +114,7 @@ class ImportQueueTest extends TestCase
         $batch = $this->createBatch(['status' => 'pending']);
 
         (new ProcessImportJob('missing-token', $batch->id, 'raw_data.xlsx'))
-            ->handle(app(ShipmentImportService::class));
+            ->handle(app(ShipmentImportService::class), app(AnomalyDetectionService::class));
 
         $batch->refresh();
 
@@ -129,7 +130,7 @@ class ImportQueueTest extends TestCase
         ]);
 
         (new ProcessImportJob('missing-token', $batch->id, 'raw_data.xlsx'))
-            ->handle(app(ShipmentImportService::class));
+            ->handle(app(ShipmentImportService::class), app(AnomalyDetectionService::class));
 
         $batch->refresh();
 
