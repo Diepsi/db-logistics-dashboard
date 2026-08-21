@@ -32,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
         Route::post('/imports', [ImportController::class, 'store'])->name('imports.store');
         Route::post('/imports/process', [ImportController::class, 'process'])->name('imports.process');
+        Route::get('/imports/{batch}/progress', [ImportController::class, 'progress'])->name('imports.progress');
         Route::delete('/imports/clear', [ImportController::class, 'clear'])->name('imports.clear');
 
         // Manajemen User — khusus Admin

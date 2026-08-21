@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ImportException;
+use App\Jobs\ProcessImportJob;
 use App\Models\ImportBatch;
 use App\Models\Location;
 use App\Models\Shipment;
@@ -21,9 +22,15 @@ class ImportController extends Controller
     {
         $importHistory = ImportBatch::with('user')
             ->orderByDesc('created_at')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('imports.index', compact('importHistory'));
+        $activeBatches = ImportBatch::query()
+            ->whereIn('status', ['pending', 'processing'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('imports.index', compact('importHistory', 'activeBatches'));
     }
 
     /**
@@ -51,7 +58,8 @@ class ImportController extends Controller
     }
 
     /**
-     * Langkah 2: Konfirmasi -> Eksekusi batch + upsert ke MySQL
+     * Langkah 2: Konfirmasi -> Buat batch pending & dispatch background job.
+     * Pemrosesan berat dieksekusi oleh queue worker (ProcessImportJob).
      */
     public function process(Request $request)
     {
@@ -61,58 +69,45 @@ class ImportController extends Controller
 
         $fileName = $request->session()->pull('import_file_name') ?? 'raw_data.xlsx';
 
-        DB::beginTransaction();
+        $batch = ImportBatch::create([
+            'file_name' => $fileName,
+            'uploaded_by' => auth()->id(),
+            'status' => 'pending',
+            'notes' => 'Menunggu diambil oleh queue worker.',
+        ]);
 
-        try {
-            $batch = ImportBatch::create([
-                'file_name' => $fileName,
-                'uploaded_by' => auth()->id(),
-                'status' => 'processing',
-                'notes' => 'Memproses impor file Excel.',
-            ]);
+        ProcessImportJob::dispatch($request->token, $batch->id, $fileName);
 
-            $result = app(ShipmentImportService::class)->process($request->token, $batch->id);
+        return redirect()->route('imports.index')->with(
+            'success',
+            "File {$fileName} masuk antrean pemrosesan. Pantau progresnya pada panel status impor."
+        );
+    }
 
-            $batch->update([
-                'total_rows' => $result['total'],
-                'valid_rows' => $result['valid'],
-                'invalid_rows' => $result['invalid'],
-                'duplicate_rows' => $result['duplicate'],
-                'new_rows' => $result['new_rows'],
-                'updated_rows' => $result['updated_rows'],
-                'status' => 'completed',
-                'notes' => sprintf(
-                    'Import selesai: %d baru, %d diperbarui, %d tidak valid, %d duplikat.',
-                    $result['new_rows'],
-                    $result['updated_rows'],
-                    $result['invalid'],
-                    $result['duplicate']
-                ),
-            ]);
+    /**
+     * Endpoint polling JSON untuk progress bar real-time.
+     */
+    public function progress(ImportBatch $batch)
+    {
+        $percentage = match (true) {
+            $batch->status === 'completed' => 100,
+            $batch->total_rows > 0 => min(100, (int) floor(($batch->processed_rows / $batch->total_rows) * 100)),
+            default => 0,
+        };
 
-            DB::commit();
-
-            return redirect()->route('imports.index')->with(
-                'success',
-                sprintf(
-                    'File %s berhasil diimpor! (%d baru, %d diperbarui)',
-                    $fileName,
-                    $result['new_rows'],
-                    $result['updated_rows']
-                )
-            );
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            if (isset($batch)) {
-                $batch->update([
-                    'status' => 'failed',
-                    'notes' => 'Gagal diproses: '.$e->getMessage(),
-                ]);
-            }
-
-            return redirect()->route('imports.index')->with('error', 'Terjadi kesalahan saat mengimpor file: '.$e->getMessage());
-        }
+        return response()->json([
+            'id' => $batch->id,
+            'file_name' => $batch->file_name,
+            'status' => $batch->status,
+            'total_rows' => $batch->total_rows,
+            'processed_rows' => $batch->processed_rows,
+            'failed_rows' => $batch->failed_rows,
+            'valid_rows' => $batch->valid_rows,
+            'new_rows' => $batch->new_rows,
+            'updated_rows' => $batch->updated_rows,
+            'percentage' => $percentage,
+            'notes' => $batch->notes,
+        ]);
     }
 
     /**

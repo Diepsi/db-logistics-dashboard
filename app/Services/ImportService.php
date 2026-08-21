@@ -126,7 +126,8 @@ class ImportService
         int $batchId,
         string $normalizerClass,
         array $sheetCandidates,
-        string $importClass = ShipmentImport::class
+        string $importClass = ShipmentImport::class,
+        ?callable $onChunk = null
     ): array {
         ini_set('memory_limit', '1024M');
         ini_set('max_execution_time', '600');
@@ -158,12 +159,18 @@ class ImportService
 
                 if (count($chunk) >= 1000) {
                     $import->collection(new Collection($chunk));
+                    if ($onChunk !== null) {
+                        $onChunk(count($chunk));
+                    }
                     $chunk = [];
                 }
             }
 
             if ($chunk !== []) {
                 $import->collection(new Collection($chunk));
+                if ($onChunk !== null) {
+                    $onChunk(count($chunk));
+                }
             }
         } finally {
             Storage::disk('local')->delete('imports/temp/'.basename($filePath));

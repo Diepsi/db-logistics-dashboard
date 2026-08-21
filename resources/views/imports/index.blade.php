@@ -41,7 +41,7 @@
         @if($errors->any())
             <div class="flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl animate-fade-up">
                 <span class="icon-chip !w-9 !h-9 bg-rose-100 text-rose-600 shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </span>
@@ -52,6 +52,56 @@
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
+                </div>
+            </div>
+        @endif
+
+        <!-- ==================== PANEL PROGRES IMPOR BACKGROUND ==================== -->
+        @if($activeBatches->isNotEmpty())
+            <div class="card p-5 border-blue-200 bg-blue-50/40" x-reveal>
+                <div class="flex items-center gap-2.5 mb-4">
+                    <span class="icon-chip !w-9 !h-9 bg-blue-100 text-blue-700 shrink-0">
+                        <svg class="w-5 h-5 animate-pulse-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800">Impor Sedang Diproses di Latar Belakang</h3>
+                        <p class="text-xs text-gray-500">Halaman ini memperbarui progres secara otomatis setiap 1,5 detik.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    @foreach($activeBatches as $batch)
+                        <div x-data="importProgress('{{ route('imports.progress', $batch) }}')"
+                             x-init="start()"
+                             class="rounded-xl bg-white border border-blue-100 p-4 shadow-sm">
+                            <div class="flex items-center justify-between gap-3 mb-2">
+                                <p class="text-xs font-bold text-gray-700 truncate flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    {{ $batch->file_name }}
+                                </p>
+                                <span class="text-xs font-black tabular-nums"
+                                      :class="status === 'failed' ? 'text-rose-600' : 'text-blue-600'"
+                                      x-text="label"></span>
+                            </div>
+                            <div class="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-500 ease-out"
+                                     :class="status === 'failed' ? 'bg-rose-500' : 'bg-gradient-to-r from-dbl-green to-emerald-400'"
+                                     :style="'width: '+pct+'%'"></div>
+                            </div>
+                            @if($batch->created_at->diffInMinutes(now()) > 10 && $batch->processed_rows === 0)
+                                <p class="mt-2 text-[11px] font-semibold text-amber-600 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    Batch belum diproses lebih dari 10 menit. Pastikan queue worker berjalan: <code class="bg-amber-50 px-1 rounded">php artisan queue:work</code>
+                                </p>
+                            @endif
+                        </div>
+                    @endforeach
                 </div>
             </div>
         @endif
@@ -183,8 +233,12 @@
                                 <td class="px-6 py-4">
                                     @if($batch->status === 'completed')
                                         <span class="badge bg-emerald-50 text-emerald-700"><span class="dot bg-emerald-500"></span>Completed</span>
-                                    @elseif(in_array($batch->status, ['processing', 'preview'], true))
-                                        <span class="badge bg-blue-50 text-blue-700"><span class="dot bg-blue-500 animate-pulse-soft"></span>{{ ucfirst($batch->status) }}</span>
+                                    @elseif($batch->status === 'processing')
+                                        <span class="badge bg-blue-50 text-blue-700"><span class="dot bg-blue-500 animate-pulse-soft"></span>Processing</span>
+                                    @elseif($batch->status === 'preview')
+                                        <span class="badge bg-slate-100 text-slate-600"><span class="dot bg-slate-400"></span>Preview</span>
+                                    @elseif($batch->status === 'pending')
+                                        <span class="badge bg-amber-50 text-amber-700"><span class="dot bg-amber-500 animate-pulse-soft"></span>Pending</span>
                                     @else
                                         <span class="badge bg-rose-50 text-rose-700"><span class="dot bg-rose-500"></span>Failed</span>
                                     @endif
@@ -260,4 +314,53 @@
             </div>
         </div>
     </x-modal>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('importProgress', (progressUrl) => ({
+            status: 'pending',
+            pct: 0,
+            label: 'Menunggu queue worker...',
+            timer: null,
+
+            start() {
+                this.poll();
+                this.timer = setInterval(() => this.poll(), 1500);
+            },
+
+            async poll() {
+                try {
+                    const res = await fetch(progressUrl, { headers: { Accept: 'application/json' } });
+                    if (!res.ok) return;
+
+                    const data = await res.json();
+                    this.status = data.status;
+                    this.pct = data.percentage ?? 0;
+                    this.label = this.buildLabel(data);
+
+                    if (data.status === 'completed' || data.status === 'failed') {
+                        clearInterval(this.timer);
+                        setTimeout(() => window.location.reload(), 1200);
+                    }
+                } catch (error) {
+                    // Jaringan gagal — coba lagi pada tick berikutnya.
+                }
+            },
+
+            buildLabel(data) {
+                if (data.status === 'completed') return 'Selesai';
+                if (data.status === 'failed') return 'Gagal';
+                if (data.total_rows > 0 && data.processed_rows > 0) {
+                    return `Memproses ${data.processed_rows.toLocaleString('id-ID')} / ${data.total_rows.toLocaleString('id-ID')} baris (${this.pct}%)`;
+                }
+
+                return 'Menunggu queue worker...';
+            },
+
+            destroy() {
+                clearInterval(this.timer);
+            },
+        }));
+    });
+    </script>
 </x-app-layout>

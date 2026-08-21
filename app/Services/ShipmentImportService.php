@@ -19,14 +19,15 @@ class ShipmentImportService
         );
     }
 
-    public function process(string $token, int $batchId): array
+    public function process(string $token, int $batchId, ?callable $onChunk = null): array
     {
         return app(ImportService::class)->process(
             $token,
             $batchId,
             ShipmentRowNormalizer::class,
             self::SHEET_CANDIDATES,
-            ShipmentImport::class
+            ShipmentImport::class,
+            $onChunk
         );
     }
 }
