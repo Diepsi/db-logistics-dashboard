@@ -18,12 +18,11 @@
         <div class="h-16 flex items-center px-6 bg-dbl-darker/80 border-b border-gray-800/80 relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-r from-dbl-green/10 via-transparent to-transparent"></div>
             <div class="flex items-center space-x-3 relative">
-                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-dbl-green to-dbl-green-dark flex items-center justify-center text-dbl-dark font-extrabold text-xl shadow-lg shadow-dbl-green/20">
-                    ANL
+                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center overflow-hidden shadow-lg shadow-black/10 shrink-0">
+                    <img src="{{ asset('images/logo-anl.png') }}" alt="Logo Amanah Nusantara Logistik" class="w-full h-full object-contain" loading="eager">
                 </div>
                 <div>
-                    <span class="text-white font-bold tracking-wider text-base block leading-tight">LOGISTICS</span>
-                    <span class="text-[10px] text-dbl-green font-semibold tracking-widest uppercase block">Amanah Nusantara Logistik</span>
+                        <span class="text-[10px] text-dbl-green font-bold tracking-widest uppercase block">Amanah Nusantara Logistik</span>
                 </div>
             </div>
         </div>

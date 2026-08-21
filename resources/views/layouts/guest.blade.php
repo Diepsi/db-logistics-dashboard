@@ -24,8 +24,8 @@
 
         <div class="min-h-screen flex flex-col sm:justify-center items-center relative py-8 sm:py-0">
             <div class="mb-6 flex flex-col items-center page-enter">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-anl-blue to-anl-navy flex items-center justify-center text-white font-extrabold text-2xl shadow-glow-lg border border-white/10">
-                    ANL
+                <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center overflow-hidden shadow-glow-lg border border-white/10">
+                    <img src="{{ asset('images/logo-anl.png') }}" alt="Logo Amanah Nusantara Logistik" class="w-full h-full object-contain p-1" loading="eager">
                 </div>
                 <p class="mt-4 text-white font-bold tracking-wider text-lg">AMANAH NUSANTARA LOGISTIK</p>
                 <p class="text-[11px] text-anl-amber font-semibold tracking-widest uppercase mt-0.5">Operational Dashboard Access</p>
