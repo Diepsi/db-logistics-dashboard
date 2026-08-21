@@ -44,23 +44,23 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             
             <!-- Top Header -->
-            <header class="bg-white/95 backdrop-blur border-b border-gray-200 dark:bg-dbl-dark/90 dark:border-gray-700/60 sticky top-0 z-10 relative">
+            <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 dark:bg-slate-900/80 dark:border-slate-800 sticky top-0 z-10 relative">
                 <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-dbl-green via-dbl-green/40 to-transparent"></div>
                 <div class="px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
 
                     <!-- Left: Mobile Menu Button & Breadcrumb/Title -->
                     <div class="flex items-center space-x-4">
-                        <button @click="sidebarOpen = !sidebarOpen" class="p-2 -ml-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors md:hidden focus:outline-none dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-700/60">
+                        <button @click="sidebarOpen = !sidebarOpen" class="p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors md:hidden focus:outline-none dark:text-slate-400 dark:hover:text-gray-100 dark:hover:bg-slate-800">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
                         <div class="flex items-center gap-3">
                             <div class="hidden sm:flex flex-col items-start">
-                                <nav class="flex items-center text-[11px] text-gray-400 mb-0.5">
-                                    <a href="{{ route('dashboard') }}" class="hover:text-dbl-green transition-colors font-medium">Beranda</a>
-                                    <span class="mx-1.5 text-gray-300">/</span>
-                                    <span class="text-gray-600 font-medium dark:text-gray-300">{{ $header ?? 'Dashboard Monitoring' }}</span>
+                                <nav class="flex items-center text-[11px] text-slate-400 mb-0.5">
+                                    <a href="{{ route('dashboard') }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Beranda</a>
+                                    <span class="mx-1.5 text-slate-300">/</span>
+                                    <span class="text-slate-600 font-medium dark:text-gray-300">{{ $header ?? 'Dashboard Monitoring' }}</span>
                                 </nav>
                                 <h1 class="text-lg font-bold text-gray-900 leading-tight dark:text-gray-50">
                                     {{ $header ?? 'Dashboard Monitoring' }}
@@ -83,7 +83,7 @@
                                     localStorage.setItem('theme', dark ? 'dark' : 'light');
                                     window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark } }));
                                 "
-                                class="p-2 rounded-lg text-gray-500 hover:text-dbl-green-dark hover:bg-dbl-green-light/50 transition-colors focus:outline-none dark:text-gray-400 dark:hover:text-dbl-green dark:hover:bg-gray-700/60"
+                                class="p-2 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors focus:outline-none dark:text-slate-400 dark:hover:text-indigo-400 dark:hover:bg-slate-800"
                                 title="Ganti tema terang/gelap">
                             <!-- Ikon matahari (tampil saat mode gelap) -->
                             <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,26 +95,21 @@
                             </svg>
                         </button>
 
-                        <!-- Badge Network Status -->
-                        <div class="hidden sm:flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full bg-dbl-green-light/50 border border-dbl-green/20 dark:bg-dbl-green/10 dark:border-dbl-green/20">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-dbl-green opacity-60"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-dbl-green"></span>
-                            </span>
-                            <span class="text-xs font-semibold text-dbl-green-dark dark:text-dbl-green">System Active</span>
-                        </div>
-
-                        <!-- User Profile Dropdown -->
+                        <!-- Mini User Profile Dropdown -->
+                        @php
+                            $nameWords = preg_split('/\s+/', trim(Auth::user()?->name ?? 'AN'));
+                            $userInitials = strtoupper(substr($nameWords[0], 0, 1).(isset($nameWords[1]) ? substr($nameWords[1], 0, 1) : ''));
+                        @endphp
                         <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="flex items-center space-x-3 rounded-full p-1 pr-2 hover:bg-gray-50 transition-colors focus:outline-none dark:hover:bg-gray-700/60">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-dbl-green to-dbl-green-dark text-white flex items-center justify-center font-bold text-sm border border-white shadow-sm">
-                                    {{ substr(Auth::user()->name ?? 'Admin', 0, 1) }}
+                            <button @click="open = !open" class="flex items-center gap-2.5 rounded-full p-1 pr-2.5 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:hover:bg-slate-800">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-bold text-xs uppercase shadow-sm ring-2 ring-white dark:ring-slate-800 shrink-0">
+                                    {{ $userInitials }}
                                 </div>
                                 <div class="hidden md:flex flex-col items-start leading-tight">
                                     <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                                        {{ Auth::user()->name ?? 'Ismail' }}
+                                        {{ Auth::user()->name ?? 'Admin' }}
                                     </span>
-                                    <span class="text-[10px] text-gray-400 font-medium">{{ Auth::user()?->role?->name ?? 'Admin' }}</span>
+                                    <span class="text-[10px] text-slate-400 font-medium max-w-[150px] truncate">{{ Auth::user()->email ?? '' }}</span>
                                 </div>
                                 <svg class="w-4 h-4 text-gray-400 hidden md:block transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -129,25 +124,33 @@
                                  x-transition:leave="transition ease-in duration-100"
                                  x-transition:leave-start="transform opacity-100 scale-100"
                                  x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lift py-1.5 border border-gray-100 z-50 dark:bg-dbl-dark dark:border-gray-700/60">
-                                <div class="px-4 py-2.5 border-b border-gray-100 mb-1 dark:border-gray-700/60">
-                                    <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Signed in as</p>
+                                 class="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lift py-1.5 border border-slate-100 z-50 dark:bg-slate-900 dark:border-slate-700/60">
+                                <div class="px-4 py-2.5 border-b border-slate-100 mb-1 dark:border-slate-700/60">
+                                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Signed in as</p>
                                     <p class="text-sm font-bold text-gray-800 truncate dark:text-gray-100">{{ Auth::user()->name ?? 'Admin' }}</p>
-                                    <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email ?? 'admin@dblogistics.com' }}</p>
+                                    <p class="text-xs text-slate-500 truncate">{{ Auth::user()->email ?? '' }}</p>
                                 </div>
-                                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:text-gray-300 dark:hover:bg-gray-700/60">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors dark:text-gray-300 dark:hover:bg-slate-800">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                     Profile Settings
                                 </a>
+                                @if(Route::has('users.index') && auth()->user()?->hasRole('admin'))
+                                    <a href="{{ route('users.index') }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors dark:text-gray-300 dark:hover:bg-slate-800">
+                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                        User Management
+                                    </a>
+                                @endif
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors dark:hover:bg-rose-500/10">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
-                                        Sign Out
+                                        Log Out
                                     </button>
                                 </form>
                             </div>

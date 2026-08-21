@@ -1,11 +1,16 @@
-@props(['active'])
+@props(['active' => false])
 
 @php
 $classes = ($active ?? false)
-            ? 'inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out'
-            : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out';
+            ? 'group flex items-center gap-3 pl-2.5 pr-3 py-2.5 text-sm font-semibold rounded-xl border-l-4 border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition duration-150'
+            : 'group flex items-center gap-3 pl-2.5 pr-3 py-2.5 text-sm font-medium rounded-xl border-l-4 border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition duration-150';
 @endphp
 
 <a {{ $attributes->merge(['class' => $classes]) }}>
-    {{ $slot }}
+    @if(isset($icon))
+        <span class="shrink-0 w-5 h-5 {{ ($active ?? false) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300' }} transition-colors">
+            {!! $icon !!}
+        </span>
+    @endif
+    <span class="truncate">{{ $slot }}</span>
 </a>
