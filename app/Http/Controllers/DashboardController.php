@@ -17,54 +17,32 @@ class DashboardController extends Controller
 
         $kpis = $this->service->kpis($query);
         $prevKpis = $this->service->previousPeriodKpis($request);
-        $deltas = $prevKpis ? [
-            'total' => DashboardService::delta($kpis['totalShipments'], $prevKpis['total']),
-            'completed' => DashboardService::delta($kpis['completed'], $prevKpis['completed']),
-            'onDelivery' => DashboardService::delta($kpis['onDelivery'], $prevKpis['on_delivery']),
-            'undelivered' => DashboardService::delta($kpis['undelivered'], $prevKpis['undelivered']),
-            'withinSla' => DashboardService::delta($kpis['withinSla'], $prevKpis['within_sla']),
-            'overSla' => DashboardService::delta($kpis['overSla'], $prevKpis['total'] - $prevKpis['within_sla']),
-            'slaRate' => $kpis['slaAchievementRate'] > 0 && $prevKpis['total'] > 0
+
+        $deltas = [
+            'total' => $prevKpis ? DashboardService::delta($kpis['totalShipments'], $prevKpis['total']) : null,
+            'slaRate' => $prevKpis && $prevKpis['total'] > 0
                 ? round($kpis['slaAchievementRate'] - (($prevKpis['within_sla'] / $prevKpis['total']) * 100), 1)
                 : null,
-        ] : [];
-
-        $statusChart = [
-            'Completed' => $kpis['completed'],
-            'On Delivery' => $kpis['onDelivery'],
-            'Undelivered' => $kpis['undelivered'],
+            'undelivered' => $prevKpis ? DashboardService::delta($kpis['undelivered'], $prevKpis['undelivered']) : null,
+            'overSla' => $prevKpis ? DashboardService::delta($kpis['overSla'], $prevKpis['total'] - $prevKpis['within_sla']) : null,
         ];
 
-        $slaChart = [
-            'Within SLA' => $kpis['withinSla'],
-            'Over SLA' => $kpis['overSla'],
+        // Ringkasan proporsi untuk stacked progress bar (pengganti donut chart).
+        $statusSummary = [
+            ['label' => 'Completed', 'value' => $kpis['completed'], 'color' => 'bg-emerald-500'],
+            ['label' => 'On Delivery', 'value' => $kpis['onDelivery'], 'color' => 'bg-amber-500'],
+            ['label' => 'Undelivered', 'value' => $kpis['undelivered'], 'color' => 'bg-rose-500'],
+        ];
+        $slaSummary = [
+            ['label' => 'Within SLA', 'value' => $kpis['withinSla'], 'color' => 'bg-emerald-500'],
+            ['label' => 'Over SLA', 'value' => $kpis['overSla'], 'color' => 'bg-rose-500'],
         ];
 
         $trend = $this->service->dailyTrend($query);
-        $trendMonthly = $this->service->monthlyTrend($query);
-        $provinceData = $this->service->provinceDistribution($query);
-        $vendorData = $this->service->vendorDistribution($query);
-        $slaStageBreakdown = $this->service->slaStageBreakdown($query);
-        $leadTimes = $this->service->leadTimes($query);
-        $worstVendors = $this->service->worstVendors($query);
-        $worstRegions = $this->service->worstRegions($query);
-
-        $issues = $this->service->openIssues($request);
-        $openIssues = $issues['items'];
-        $issuesTotal = $issues['total'];
-
+        $needsAttention = $this->service->needsAttention($request);
+        $activityFeed = $this->service->activityFeed();
         $latestImport = $this->service->latestImport();
-
-        $recentShipments = $this->service->shipmentQuery($request)
-            ->orderByDesc('ho_date')
-            ->limit(10)
-            ->get(['id', 'waybill_no', 'ho_date', 'province', 'city_regency', 'vendor_lm', 'final_status', 'is_within_sla']);
-
-        $bastFinance = $this->service->bastFinanceBreakdown();
-        $slaMmVsLm = $this->service->slaMmVsLmComparison();
-        $vendorMmPerformance = $this->service->vendorMmPerformance();
-        $inboundFmMetrics = $this->service->inboundFirstMileMetrics();
-        $statusAkhirDistribution = $this->service->statusAkhirDistribution($query);
+        $activeIssues = $this->service->openIssueCount();
 
         $filterOptions = $this->service->filterOptions($request);
 
@@ -72,25 +50,13 @@ class DashboardController extends Controller
             'kpis',
             'prevKpis',
             'deltas',
-            'statusChart',
-            'slaChart',
+            'statusSummary',
+            'slaSummary',
             'trend',
-            'trendMonthly',
-            'provinceData',
-            'vendorData',
-            'slaStageBreakdown',
-            'leadTimes',
-            'worstVendors',
-            'worstRegions',
-            'openIssues',
-            'issuesTotal',
+            'needsAttention',
+            'activityFeed',
             'latestImport',
-            'recentShipments',
-            'bastFinance',
-            'slaMmVsLm',
-            'vendorMmPerformance',
-            'inboundFmMetrics',
-            'statusAkhirDistribution',
+            'activeIssues',
         ), $filterOptions));
     }
 }
