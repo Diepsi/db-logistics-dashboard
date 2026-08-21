@@ -18,7 +18,7 @@
         <div class="h-16 flex items-center px-6 bg-dbl-darker/80 border-b border-gray-800/80 relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-r from-dbl-green/10 via-transparent to-transparent"></div>
             <div class="flex items-center space-x-3 relative">
-                <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center overflow-hidden shadow-lg shadow-black/10 shrink-0">
+                <div class="w-11 h-11 rounded-lg bg-white flex items-center justify-center overflow-hidden shadow-lg shadow-black/10 shrink-0">
                     <img src="{{ asset('images/logo-anl.png') }}" alt="Logo Amanah Nusantara Logistik" class="w-full h-full object-contain" loading="eager">
                 </div>
                 <div>
