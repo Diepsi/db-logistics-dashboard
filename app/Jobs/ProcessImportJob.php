@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\ImportBatch;
+use App\Services\AnomalyDetectionService;
 use App\Services\ShipmentImportService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,7 +26,7 @@ class ProcessImportJob implements ShouldQueue
         public string $fileName,
     ) {}
 
-    public function handle(ShipmentImportService $importService): void
+    public function handle(ShipmentImportService $importService, AnomalyDetectionService $anomalyDetection): void
     {
         $batch = ImportBatch::find($this->batchId);
 
@@ -64,6 +65,8 @@ class ProcessImportJob implements ShouldQueue
                     $result['duplicate']
                 ),
             ]);
+
+            $anomalyDetection->detectAll();
         } catch (Throwable $e) {
             $batch->update([
                 'status' => 'failed',

@@ -34,6 +34,59 @@
             </div>
         </div>
 
+        <!-- Lifecycle Timeline -->
+        <div class="card p-6" x-reveal>
+            <div class="flex items-center gap-2.5 mb-5">
+                <span class="icon-chip bg-indigo-100 text-indigo-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                </span>
+                <h3 class="text-base font-bold text-gray-800">Timeline Pengiriman</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-y-6 md:gap-x-3">
+                @foreach($timeline as $index => $step)
+                    @php
+                        $styles = [
+                            'done' => ['ring' => 'bg-emerald-50 border-emerald-200 text-emerald-600', 'dot' => 'bg-emerald-500', 'badge' => 'bg-emerald-50 text-emerald-700'],
+                            'current' => ['ring' => 'bg-blue-50 border-blue-300 text-blue-600', 'dot' => 'bg-blue-500 animate-pulse-soft', 'badge' => 'bg-blue-50 text-blue-700'],
+                            'issue' => ['ring' => 'bg-rose-50 border-rose-300 text-rose-600', 'dot' => 'bg-rose-500', 'badge' => 'bg-rose-50 text-rose-700'],
+                            'pending' => ['ring' => 'bg-gray-50 border-gray-200 text-gray-400', 'dot' => 'bg-gray-300', 'badge' => 'bg-gray-100 text-gray-500'],
+                        ];
+                        $style = $styles[$step['state']];
+                        $icons = [
+                            'done' => 'M5 13l4 4L19 7',
+                            'current' => 'M12 8v4l3 3',
+                            'issue' => 'M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z',
+                            'pending' => 'M6 18L18 6M6 6l12 12',
+                        ];
+                    @endphp
+                    <div class="relative flex md:flex-col items-start md:items-center gap-3">
+                        @if(! $loop->last)
+                            <div class="hidden md:block absolute top-5 left-[60%] w-[80%] h-0.5 {{ $step['state'] === 'done' ? 'bg-emerald-200' : 'bg-gray-200' }}"></div>
+                        @endif
+
+                        <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center shrink-0 z-10 {{ $style['ring'] }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="{{ $icons[$step['state']] }}" />
+                            </svg>
+                        </div>
+
+                        <div class="md:text-center min-w-0">
+                            <p class="text-xs font-bold text-gray-800 truncate">{{ $step['label'] }}</p>
+                            <p class="text-[11px] font-semibold tabular-nums mt-0.5 {{ $step['date'] ? 'text-gray-600' : 'text-gray-400' }}">
+                                {{ $step['date'] ?? '—' }}
+                            </p>
+                            <span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-semibold max-w-full truncate {{ $style['badge'] }}" title="{{ $step['caption'] }}">
+                                {{ $step['caption'] }}
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Info Utama -->
             <div class="lg:col-span-2 card p-6">
