@@ -14,6 +14,7 @@ flowchart TD
     Admin(["Admin"])
     PM(["Project Manager"])
     Staff(["Staff"])
+    Visitor(["Pengunjung Website"])
     Excel(["File Data Excel"])
 
     %% ===== Data Store =====
@@ -24,6 +25,7 @@ flowchart TD
     DS_Vendors[("vendors")]
     DS_Locations[("locations")]
     DS_Issues[("shipment_issues")]
+    DS_Posts[("posts")]
 
     %% ===== Proses =====
     P1("1.0 Autentikasi")
@@ -32,6 +34,9 @@ flowchart TD
     P4("4.0 Kelola Data Pengiriman")
     P5("5.0 Laporan & Ekspor")
     P6("6.0 Dashboard KPI")
+    P7("7.0 Kelola Berita (CMS)")
+    P8("8.0 Halaman Publik")
+    P9("9.0 Form Kontak")
 
     subgraph ModulDashboard["Modul Dashboard Operasional"]
         direction TB
@@ -39,6 +44,11 @@ flowchart TD
         P3 --> P4
         P4 --> P6
         P4 --> P5
+    end
+
+    subgraph ModulWebsite["Modul Website Publik & CMS"]
+        direction TB
+        P7 --> P8
     end
 
     %% ---- 1.0 Autentikasi ----
@@ -94,3 +104,18 @@ flowchart TD
     P6 -->|"data KPI dashboard"| Admin
     P6 -->|"data KPI dashboard"| PM
     P6 -->|"data KPI dashboard"| Staff
+
+    %% ---- 7.0 Kelola Berita (CMS) ----
+    Admin -->|"login website / CMS"| P7
+    P7 -->|"baca / tulis / hapus artikel"| DS_Posts
+    P7 -->|"konfirmasi simpan / publikasi"| Admin
+
+    %% ---- 8.0 Halaman Publik ----
+    Visitor -->|"buka halaman (beranda, tentang, layanan, berita)"| P8
+    P8 -->|"baca artikel yang dipublikasikan"| DS_Posts
+    P8 -->|"konten halaman website"| Visitor
+
+    %% ---- 9.0 Form Kontak ----
+    Visitor -->|"isi form kontak"| P9
+    P9 -->|"catat pesan ke log aplikasi (logger)"| Visitor
+    P9 -->|"konfirmasi pesan terkirim"| Visitor

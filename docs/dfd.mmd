@@ -13,6 +13,7 @@ flowchart TB
     Admin(["Admin"])
     PM(["Project Manager"])
     Staff(["Staff"])
+    Visitor(["Pengunjung<br/>Website"])
     Excel(["File Data<br/>Excel"])
 
     %% Modul Dashboard
@@ -27,3 +28,7 @@ flowchart TB
 
     Excel -->|"data pengiriman mentah (Excel)"| P0
     P0 -->|"laporan validasi import (valid / invalid / duplikat)"| Excel
+
+    %% Modul Website Publik
+    Visitor -->|"lihat halaman, cari berita, isi form kontak"| P0
+    P0 -->|"konten website & konfirmasi pesan"| Visitor

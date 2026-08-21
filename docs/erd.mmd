@@ -110,9 +110,24 @@ erDiagram
         timestamp updated_at
     }
 
+    POSTS {
+        bigint id PK
+        string title
+        string slug UK
+        string excerpt
+        longtext body
+        string cover_image
+        bigint author_id FK
+        string status
+        timestamp published_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
     ROLES ||--o{ USERS : "memiliki"
     USERS ||--o{ IMPORT_BATCHES : "mengupload"
     USERS ||--o{ SHIPMENT_ISSUES : "menyelesaikan"
+    USERS ||--o{ POSTS : "menulis"
     IMPORT_BATCHES ||--o{ SHIPMENTS : "berisi"
     VENDORS ||--o{ SHIPMENTS : "ditetapkan"
     LOCATIONS ||--o{ SHIPMENTS : "dituju"
