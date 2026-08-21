@@ -42,6 +42,7 @@ Route::middleware(['auth'])->group(function () {
     // Modul Analitik, Laporan & Export — Admin, Project Manager & Staff
     Route::middleware('role:admin,project-manager,staff')->group(function () {
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+        Route::get('/analytics/map-data', [AnalyticsController::class, 'mapData'])->name('analytics.map-data');
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
         Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');

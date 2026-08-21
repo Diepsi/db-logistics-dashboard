@@ -10,6 +10,7 @@ use App\Models\Shipment;
 use App\Models\ShipmentIssue;
 use App\Models\Vendor;
 use App\Services\ShipmentImportService;
+use App\Support\CacheKeys;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -126,6 +127,7 @@ class ImportController extends Controller
             Location::query()->forceDelete();
 
             DB::commit();
+            CacheKeys::flushAll();
 
             return redirect()->route('imports.index')->with(
                 'success',

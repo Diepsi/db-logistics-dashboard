@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\ImportBatch;
 use App\Services\AnomalyDetectionService;
 use App\Services\ShipmentImportService;
+use App\Support\CacheKeys;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -72,6 +73,8 @@ class ProcessImportJob implements ShouldQueue
                 'status' => 'failed',
                 'notes' => 'Gagal diproses: '.$e->getMessage(),
             ]);
+        } finally {
+            CacheKeys::flushAll();
         }
     }
 }

@@ -464,7 +464,104 @@
 
         </div>
 
+        <!-- ==================== PETA DISTRIBUSI & HUB BOTTLENECK ==================== -->
+        <div class="card p-5" x-reveal>
+            <h4 class="text-base font-bold text-gray-800 dark:text-gray-100 mb-1 flex items-center justify-between">
+                <span>Peta Distribusi &amp; Hub Bottleneck</span>
+                <span class="text-xs text-gray-400 font-normal">Volume · SLA Breach · Issue terbuka</span>
+            </h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                Ukuran lingkaran = volume pengiriman. Warna merah = memiliki SLA breach atau issue terbuka.
+                <span id="map-unmapped-hint" class="hidden font-semibold text-amber-600"></span>
+            </p>
+
+            <div class="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-0">
+                <div id="distribution-map" class="h-[420px] w-full bg-gray-100 dark:bg-gray-800"></div>
+                <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-gray-900/60 text-sm font-semibold text-gray-500">
+                    Memuat peta...
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        (function () {
+            const map = L.map('distribution-map', { scrollWheelZoom: true }).setView([-2.5, 118.0], 5);
+
+            const tileLayers = {
+                light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 19,
+                }),
+                dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 19,
+                }),
+            };
+
+            let currentTiles = document.documentElement.classList.contains('dark')
+                ? tileLayers.dark
+                : tileLayers.light;
+            currentTiles.addTo(map);
+
+            window.addEventListener('theme-changed', (event) => {
+                map.removeLayer(currentTiles);
+                currentTiles = event.detail.dark ? tileLayers.dark : tileLayers.light;
+                currentTiles.addTo(map);
+            });
+
+            fetch("{{ route('analytics.map-data') }}", { headers: { Accept: 'application/json' } })
+                .then((res) => res.json())
+                .then((data) => {
+                    document.getElementById('map-loading')?.remove();
+
+                    if (!data.markers || data.markers.length === 0) {
+                        document.getElementById('map-unmapped-hint')?.classList.remove('hidden');
+                        return;
+                    }
+
+                    const maxVolume = Math.max(...data.markers.map((m) => m.total_shipments));
+
+                    data.markers.forEach((marker) => {
+                        const radius = 8 + 22 * Math.sqrt(marker.total_shipments / maxVolume);
+                        const troubled = marker.sla_breach > 0 || marker.open_issues > 0;
+
+                        L.circleMarker([marker.lat, marker.lng], {
+                            radius,
+                            color: troubled ? '#EF4444' : '#10B981',
+                            weight: 2,
+                            fillColor: troubled ? '#F87171' : '#34D399',
+                            fillOpacity: 0.45,
+                        })
+                            .bindPopup(
+                                `<strong>${marker.city_regency || marker.province}</strong><br>` +
+                                `Provinsi: ${marker.province}<br>` +
+                                `Total pengiriman: ${marker.total_shipments.toLocaleString('id-ID')}<br>` +
+                                `SLA breach: ${marker.sla_breach.toLocaleString('id-ID')}<br>` +
+                                `Issue terbuka: ${marker.open_issues.toLocaleString('id-ID')}`
+                            )
+                            .addTo(map);
+                    });
+
+                    if (data.unmapped_shipments > 0) {
+                        const hint = document.getElementById('map-unmapped-hint');
+                        if (hint) {
+                            hint.textContent =
+                                `${data.unmapped_shipments.toLocaleString('id-ID')} pengiriman di lokasi tanpa koordinat tidak ditampilkan.`;
+                            hint.classList.remove('hidden');
+                        }
+                    }
+                })
+                .catch(() => document.getElementById('map-loading')?.remove());
+        })();
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
