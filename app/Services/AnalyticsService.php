@@ -263,13 +263,16 @@ class AnalyticsService
     public function vendorMmPerformance(int $minVolume = 5, int $limit = 10): Collection
     {
         $inList = StatusNormalizer::sqlInList();
+        $hourDiff = fn (string $from, string $to): string => DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(AVG((julianday({$to}) - julianday({$from})) * 24) AS REAL)"
+            : "AVG(TIMESTAMPDIFF(HOUR, {$from}, {$to}))";
 
-        return collect(Cache::remember('dashboard:vendor_mm', 300, function () use ($inList, $minVolume, $limit) {
+        return collect(Cache::remember('dashboard:vendor_mm', 300, function () use ($inList, $minVolume, $limit, $hourDiff) {
             return SlaMiddleMile::select(
                 'vendor_mm as vendor',
                 DB::raw('COUNT(*) as total'),
                 DB::raw("SUM(CASE WHEN LOWER(TRIM(COALESCE(result_mm, ''))) IN ({$inList}) THEN 1 ELSE 0 END) as within_sla"),
-                DB::raw('AVG(TIMESTAMPDIFF(HOUR, eta_mm, tgl_sampai_kota_tujuan)) as avg_hours')
+                DB::raw($hourDiff('eta_mm', 'tgl_sampai_kota_tujuan').' as avg_hours')
             )
                 ->whereNotNull('vendor_mm')
                 ->where('vendor_mm', '!=', '')
